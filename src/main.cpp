@@ -5,16 +5,36 @@
 #include <spdlog/spdlog.h>
 #include "sphere.h"
 #include "hitable_list.h"
+#include "camera.h"
+#include "rng.h"
 
 using namespace mathLib;
+using namespace rtLib;
+
+
+
+vec3 random_in_unit_sphere()
+{
+	rando rand;
+	vec3 p;
+	do 
+	{
+		p = 2.0 * vec3(static_cast<float>(rand.genRand()), 
+			static_cast<float>(rand.genRand()),
+			static_cast<float>(rand.genRand())) - vec3(1.0f, 1.0f, 1.0f);
+	}   while (p.squared_length() >= 1.0f);
+	return p;
+}
+
 
 
 vec3 color(const ray& r, hitable* world)
 {
 	hit_record rec;
-	if (world->hit(r, 0.0f, MAXFLOAT, rec))
+	if (world->hit(r, 0.001f, MAXFLOAT, rec))
 	{
-		return 0.5f * vec3(rec.normal.x() + 1.0f, rec.normal.y() + 1.0f, rec.normal.z() + 1.0f);
+		vec3 target {rec.p + rec.normal + random_in_unit_sphere()};
+		return 0.5f * color(ray(rec.p, target-rec.p), world);
 	}
 	else
 	{
@@ -25,21 +45,23 @@ vec3 color(const ray& r, hitable* world)
 }
 
 
+
+
+
+
+
 int main()
 {
-	constexpr int nx {200};
-	constexpr int ny {100};
-	constexpr float pixelValScale {255.99f};
+	constexpr int nx {1600};
+	constexpr int ny {800};
+	constexpr int ns {200};
+	constexpr float pixelValScale {255.9999f};
 	const std::string fileName("output.ppm");
+
 
 	spdlog::info("Writing to file: {}...", fileName);
 	std::ofstream oFile(fileName);
 	oFile << "P3\n" << nx << " " << ny <<"\n255\n";
-
-	const vec3 lower_left_corner(-2.0f, -1.0f, -1.0f);
-	const vec3 horizontal(4.0f, 0.0f, 0.0f);
-	const vec3 vertical(0.0f, 2.0f, 0.0f);
-	const vec3 origin(0.0f, 0.0f, 0.0f);
 
 	hitable* list[2];
 	{
@@ -48,24 +70,48 @@ int main()
 	}
 	hitable* world = new hitable_list(list, 2);
 
+	camera cam;
+	rando rand;
+
+
+	//randomizer rand;
+	uint64_t counter {0};
 	for (int j = ny - 1; j >= 0; --j)
 	{
 		for (int i = 0; i <nx; ++i)
 		{
-			const float u {static_cast<float>(i) / static_cast<float>(nx)};
-			const float v {static_cast<float>(j) / static_cast<float>(ny)};
-			ray r(origin, lower_left_corner + u*horizontal + v*vertical);
+			vec3 col(0.0f, 0.0f, 0.0f);
+			for (int s = 0; s < ns; ++s)
+			{
+				const float u {(static_cast<float>(i + rand.genRand()))/ static_cast<float>(nx)};
+				const float v {(static_cast<float>(j + rand.genRand()))/ static_cast<float>(ny)};
+				const ray r {cam.get_ray(u, v)};
+				//vec3 p 			{r.point_at_parameter(2.0f)};
+				col += color(r, world);
+				
+			}
+			counter += ns;
 
-			//vec3 p 			{r.point_at_parameter(2.0f)};
-			vec3 col 		{color(r, world)};
+			col /= static_cast<float>(ns);
+			col = vec3(std::sqrt(col.r()), std::sqrt(col.g()), std::sqrt(col.b()));
 			const int ir 	{static_cast<int>(pixelValScale*col.r())};
 			const int ig 	{static_cast<int>(pixelValScale*col.g())};
 			const int ib 	{static_cast<int>(pixelValScale*col.b())};
 
 			oFile << ir << " " << ig << " " << ib << "\n";
 		}
+		if ((j % 100) == 0 )
+		{
+			spdlog::info("Completed iter: {}", counter);
+		}
 	}
 	oFile.close();
 	spdlog::info("Closing file: {}", fileName);
+	{ // cleanup
+		delete list[0];
+		delete list[1];
+		delete world;
+	}
+
 	return 0;
 } 

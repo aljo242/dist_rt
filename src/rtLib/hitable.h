@@ -3,7 +3,9 @@
 
 #include "ray.h"
 
-namespace mathLib
+using namespace mathLib;
+
+namespace rtLib
 {
 
 struct hit_record

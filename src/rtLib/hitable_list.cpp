@@ -2,6 +2,8 @@
 
 using namespace mathLib;
 
+using namespace rtLib;
+
 bool hitable_list::hit(const ray& r, const float t_min, 
 		const float t_max, hit_record& rec) const 
 {

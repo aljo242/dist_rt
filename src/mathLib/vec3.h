@@ -12,7 +12,7 @@ namespace mathLib
 class vec3
 {
 public:
-	vec3();
+	vec3() = default;
 	vec3(const float e0, const float e1, const float e2);
 
 
@@ -179,7 +179,7 @@ inline vec3 cross(const vec3& v1, const vec3& v2)
 }
 
 
-inline vec3 unit_vector(vec3 v)
+inline vec3 unit_vector(const vec3& v)
 {
 	return v / v.length();
 }

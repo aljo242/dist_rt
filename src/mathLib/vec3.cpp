@@ -2,7 +2,6 @@
 
 using namespace mathLib;
 
-vec3::vec3() {}
 
 vec3::vec3(const float e0, const float e1, const float e2)
 {

@@ -8,7 +8,7 @@ namespace mathLib
 class ray
 {
 public:
-	ray();
+	ray() = default;
 	ray(const vec3& a, const vec3& b);
 	inline vec3 origin() const {return A;}
 	inline vec3 direction() const {return B;}

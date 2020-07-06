@@ -1,6 +1,8 @@
 
 
-add_library(rtLib hitable_list.cpp hitable_list.h
+add_library(rtLib 
+	camera.cpp camera.h
+	hitable_list.cpp hitable_list.h
 	sphere.cpp sphere.h
 	hitable.h
 	)
