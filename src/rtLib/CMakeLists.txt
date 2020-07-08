@@ -1,6 +1,8 @@
 
 
 add_library(rtLib 
+	casting.cpp casting.h
+	material.cpp material.h
 	camera.cpp camera.h
 	hitable_list.cpp hitable_list.h
 	sphere.cpp sphere.h

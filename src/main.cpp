@@ -7,46 +7,11 @@
 #include "hitable_list.h"
 #include "camera.h"
 #include "rng.h"
+#include "casting.h"
+#include "material.h"
 
 using namespace mathLib;
 using namespace rtLib;
-
-
-
-vec3 random_in_unit_sphere()
-{
-	rando rand;
-	vec3 p;
-	do 
-	{
-		p = 2.0 * vec3(static_cast<float>(rand.genRand()), 
-			static_cast<float>(rand.genRand()),
-			static_cast<float>(rand.genRand())) - vec3(1.0f, 1.0f, 1.0f);
-	}   while (p.squared_length() >= 1.0f);
-	return p;
-}
-
-
-
-vec3 color(const ray& r, hitable* world)
-{
-	hit_record rec;
-	if (world->hit(r, 0.001f, MAXFLOAT, rec))
-	{
-		vec3 target {rec.p + rec.normal + random_in_unit_sphere()};
-		return 0.5f * color(ray(rec.p, target-rec.p), world);
-	}
-	else
-	{
-		vec3 unit_direction {unit_vector(r.direction())};
-		const float t {0.5f * (unit_direction.y() + 1.0f)};
-		return ((1.0f - t)*vec3(1.0f, 1.0f, 1.0f) + t*vec3(0.5f, 0.7f, 1.0f));
-	}
-}
-
-
-
-
 
 
 
@@ -56,23 +21,25 @@ int main()
 	constexpr int ny {800};
 	constexpr int ns {200};
 	constexpr float pixelValScale {255.9999f};
+	constexpr int numObjects {5};
 	const std::string fileName("output.ppm");
-
 
 	spdlog::info("Writing to file: {}...", fileName);
 	std::ofstream oFile(fileName);
 	oFile << "P3\n" << nx << " " << ny <<"\n255\n";
 
-	hitable* list[2];
+	hitable* list[numObjects];
 	{
-		list[0] = new sphere(vec3(0.0f, 0.0f, -1.0f), 0.5f);
-		list[1] = new sphere(vec3(0.0f, -100.5f, -1.0f), 100.0f);
+		list[0] = new sphere(vec3(0.0f, 0.0f, -1.0f), 0.5f, new metal(vec3(0.8f, 0.3f, 0.3f), 1.0f));
+		list[1] = new sphere(vec3(0.0f, -100.5f, -1.0f), 100.0f, new lambertian(vec3(0.1f, 0.8f, 0.0f)));
+		list[2] = new sphere(vec3(1.0f, 0.0f, -1.0f), 0.5f, new metal(vec3(0.8f, 0.6f, 0.2f), 0.3f));
+		list[3] = new sphere(vec3(-1.0f, 0.0f, -1.0f), 0.5f, new dialectric(1.5f));
+		list[4] = new sphere(vec3(-1.0f, 0.0f, -1.0f), -0.25f, new dialectric(1.5f));
 	}
-	hitable* world = new hitable_list(list, 2);
+	hitable* world = new hitable_list(list, numObjects);
 
 	camera cam;
 	rando rand;
-
 
 	//randomizer rand;
 	uint64_t counter {0};
@@ -87,7 +54,7 @@ int main()
 				const float v {(static_cast<float>(j + rand.genRand()))/ static_cast<float>(ny)};
 				const ray r {cam.get_ray(u, v)};
 				//vec3 p 			{r.point_at_parameter(2.0f)};
-				col += color(r, world);
+				col += color(r, world, 0);
 				
 			}
 			counter += ns;

@@ -8,11 +8,15 @@ using namespace mathLib;
 namespace rtLib
 {
 
+class material;
+
 struct hit_record
 {
 	float t;
 	vec3 p;
 	vec3 normal;
+	material *mat_ptr = nullptr;
+	
 };
 
 class hitable

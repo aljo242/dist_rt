@@ -95,7 +95,7 @@ struct random_device_seed
 	result_type operator()() const
 	{
 		std::random_device rd;
-		if (sizeof(result_type) > sizeof(std::random_device::result_type))
+		if constexpr (sizeof(result_type) > sizeof(std::random_device::result_type))
 			return rd() | (result_type{rd()} << 32);
 		else
 			return rd();
@@ -189,7 +189,7 @@ public:
 	rando() : gen(seed()) {}
 	double genRand()
 	{
-		constexpr double uint64Max {std::numeric_limits<uint64_t>::max()};
+		constexpr double uint64Max {static_cast<double>(std::numeric_limits<uint64_t>::max())};
 		return (static_cast<double>(gen()) / uint64Max);
 	}
 

@@ -9,7 +9,7 @@ function(set_project_warnings project_name)
 	option(
 		WARNINGS_AS_ERRORS 
 		"Treat compiler warnings as errors" 
-		TRUE
+		OFF
 		)
 
 	set(MSVC_WARNINGS
@@ -63,7 +63,7 @@ function(set_project_warnings project_name)
 
 		set(MSVC_WARNINGS 
 			${MSVC_WARNINGS} 
-			/Wx
+			/WX
 			)
 	endif()
 
