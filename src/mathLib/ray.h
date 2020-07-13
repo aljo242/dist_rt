@@ -9,14 +9,19 @@ class ray
 {
 public:
 	ray() = default;
-	ray(const vec3& a, const vec3& b);
-	inline vec3 origin() const {return A;}
-	inline vec3 direction() const {return B;}
-	vec3 point_at_parameter(const float t) const;
+	ray(const point3& o, const vec3& d);
+	ray(const point3& o, const vec3& d, const double time);
+
+	inline point3 Origin() const 	{return origin;}
+	inline vec3 Direction() const 	{return dir;}
+	inline double Time() const 		{return tm;}
+
+	point3 At(const double t) const;
 
 private:
-	vec3 A;
-	vec3 B;
+	point3 origin;
+	vec3 dir;
+	double tm;
 };
 } // namespace mathLib
 

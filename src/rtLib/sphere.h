@@ -1,35 +1,35 @@
 #ifndef SPHERE_H
 #define SPHERE_H
 
-#include "hitable.h"
-#include "material.h"
+#include "hittable.h"
+#include "vec3.h"
 
 using namespace mathLib;
 
 namespace rtLib
 {
+
+class Material;
 	
-class sphere: public hitable
+class sphere: public hittable
 {
 public:
 	sphere() = default;
-	sphere(const vec3& cen, const float r, material* p) : center(cen), radius(r), mat_ptr(p) {}
+	explicit sphere(const point3& cen, const double r, std::shared_ptr<Material> p) 
+		: center(cen), radius(r), pMat(p) 
+	{}
 
-	virtual bool hit(const ray& r, const float t_min, 
-		const float t_max, hit_record& rec) const override;
+	virtual bool Hit(const ray& r, const double t_min, 
+		const double t_max, HitRecord& rec) const override;
 	
-protected:
 	virtual ~sphere() = default;
 
-
-
-private:
-	vec3 center;
-	float radius;
-	material* mat_ptr;
+	point3 center;
+	double radius;
+	std::shared_ptr<Material> pMat;
 };
 
 
 } // namespace mathLib
 
-#endif
+#endif // SPHERE_H

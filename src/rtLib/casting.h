@@ -1,9 +1,8 @@
 #ifndef CASTING_H
 #define CASTING_H
 
+#include "common.h"
 #include "vec3.h"
-#include "ray.h"
-#include "hitable.h"
 
 using namespace mathLib;
 
@@ -11,12 +10,12 @@ using namespace mathLib;
 namespace rtLib
 {
 
-vec3 random_in_unit_sphere();
-vec3 color(const ray& r, hitable* world, const int depth);
-vec3 reflect(const vec3& vec, const vec3& normal);
-bool refract(const vec3& vec, const vec3& normal, const float refRatio, vec3& refracted);
-float schlick(const float cosine, const float refIdx);
-
+vec3 RandInUnitDisk();
+vec3 RandUnitVec();
+vec3 RandInUnitSphere();
+vec3 RandInHemiSphere(const vec3& normal);
+vec3 Reflect(const vec3& vec, const vec3& normal);
+vec3 Refract(const vec3& uv, const vec3& normal, const double refRatio);
 
 } // namespace rtLib
 

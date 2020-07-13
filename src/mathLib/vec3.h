@@ -6,28 +6,30 @@
 #include <iostream>
 #include <array>
 
+#include "common.h"
+
 namespace mathLib
 {
 
 class vec3
 {
 public:
-	vec3() = default;
-	vec3(const float e0, const float e1, const float e2);
+	vec3() : e{0.0, 0.0, 0.0} {}
+	vec3(const double e0, const double e1, const double e2);
 
 
-	inline float x() const {return e[0];}
-	inline float y() const {return e[1];}
-	inline float z() const {return e[2];}
+	inline double x() const {return e[0];}
+	inline double y() const {return e[1];}
+	inline double z() const {return e[2];}
 
-	inline float r() const {return e[0];}
-	inline float g() const {return e[1];}
-	inline float b() const {return e[2];}
+	inline double r() const {return e[0];}
+	inline double g() const {return e[1];}
+	inline double b() const {return e[2];}
 
 	inline const vec3& operator+() const {return *this;}
 	inline vec3 operator-() const {return vec3(-e[0], -e[1], -e[2]);}
-	inline float operator[](const size_t i) const { return e[i]; }
-	inline float& operator[](const size_t i) { return e[i]; }
+	inline double operator[](const size_t i) const { return e[i]; }
+	inline double& operator[](const size_t i) { return e[i]; }
 
 	inline vec3& operator+=(const vec3& b)
 	{
@@ -61,7 +63,7 @@ public:
 		return *this;	
 	}
 
-	inline vec3& operator+=(const float t)
+	inline vec3& operator+=(const double t)
 	{
 		e[0] += t;
 		e[1] += t;
@@ -69,7 +71,7 @@ public:
 		return *this;		
 	}
 
-	inline vec3& operator-=(const float t)
+	inline vec3& operator-=(const double t)
 	{	
 		e[0] -= t;
 		e[1] -= t;
@@ -77,14 +79,14 @@ public:
 		return *this;	
 	}
 
-	inline vec3& operator*=(const float t)
+	inline vec3& operator*=(const double t)
 	{
 		e[0] *= t;
 		e[1] *= t;
 		e[2] *= t;
 		return *this;		
 	}
-	inline vec3& operator/=(const float t)
+	inline vec3& operator/=(const double t)
 	{
 		e[0] /= t;
 		e[1] /= t;
@@ -93,27 +95,43 @@ public:
 	}
 
 
-	inline float length() const
+	inline double Length() const
 	{
 		return std::sqrt((e[0] * e[0]) + (e[1] * e[1]) + (e[2] * e[2]));
 	}
 
-	inline float squared_length() const
+	inline double SquaredLength() const
 	{
 		return ((e[0] * e[0]) + (e[1] * e[1]) + (e[2] * e[2]));
 	}
 
-	inline void make_unit()
+	inline void MakeUnit()
 	{
-		float k {1.0f / length()};
+		double k {1.0 / Length()};
 		e[0] *= k;
 		e[1] *= k;
 		e[2] *= k;
 	}
 
+	inline static vec3 Random()
+	{
+		return {RandDouble(), RandDouble(), RandDouble()};
+	}
+
+	inline static vec3 Random(const double min, const double max)
+	{
+		return {RandDouble(min, max), RandDouble(min, max), RandDouble(min, max)};
+	}
+
 private:
-	std::array<float, 3> e;
+	std::array<double, 3> e;
 };
+
+
+// type aliases
+using point3 = vec3;
+using color3 = vec3;
+
 
 // non class operations
 
@@ -150,27 +168,27 @@ inline vec3 operator/(const vec3& v1, const vec3& v2)
 	return vec3((v1.x() / v2.x()), (v1.y() / v2.y()), (v1.z() / v2.z()));	
 }
 
-inline vec3 operator*(const float t, const vec3& v)
+inline vec3 operator*(const double t, const vec3& v)
 {
 	return vec3((v.x() * t), (v.y() * t), (v.z() * t));	
 }
 
-inline vec3 operator*(const vec3& v, const float t)
+inline vec3 operator*(const vec3& v, const double t)
 {
 	return vec3((v.x() * t), (v.y() * t), (v.z() * t));	
 }
 
-inline vec3 operator/(const vec3& v, const float t)
+inline vec3 operator/(const vec3& v, const double t)
 {
 	return vec3((v.x() / t), (v.y() / t), (v.z() / t));	
 }
 
-inline float dot(const vec3& v1, const vec3& v2)
+inline double Dot(const vec3& v1, const vec3& v2)
 {
 	return (v1.x() * v2.x()) + (v1.y() * v2.y()) + (v1.z() * v2.z());
 }
 
-inline vec3 cross(const vec3& v1, const vec3& v2)
+inline vec3 Cross(const vec3& v1, const vec3& v2)
 {
 	return vec3( 	((v1.y() * v2.z()) - (v1.z() * v2.y())),
 					((v1.x() * v2.z()) - (v1.z() * v2.x())),
@@ -179,9 +197,9 @@ inline vec3 cross(const vec3& v1, const vec3& v2)
 }
 
 
-inline vec3 unit_vector(const vec3& v)
+inline vec3 UnitVector(const vec3& v)
 {
-	return v / v.length();
+	return v / v.Length();
 }
 
 

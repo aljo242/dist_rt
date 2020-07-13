@@ -1,69 +1,70 @@
 #ifndef MATERIAL_H
 #define MATERIAL_H
 
+#include "common.h"
 #include "vec3.h"
 #include "ray.h"
-#include "hitable_list.h"
+#include "hittable_list.h"
 
 namespace rtLib
 {
 
 
+double Schlick(const double cosine, const double refIdx);
 
-class material
+
+class Material
 {
 public:
-	virtual bool scatter(const ray& r, const hit_record& rec,
+	virtual bool Scatter(const ray& r, const HitRecord& rec,
 		vec3& attenuation, ray& scattered) const = 0;
 
-	virtual ~material() {}
+	virtual ~Material() = default;
+
 };
 
 
-class lambertian : public material
+
+class Lambertian : public Material
 {
 public:
-	explicit lambertian(const vec3& a) : albedo(a) {}
-	bool scatter(const ray& r, const hit_record& rec,
+	explicit Lambertian(const color3& a) : albedo(a) {}
+	bool Scatter(const ray& r, const HitRecord& rec,
 		vec3& attenuation, ray& scattered) const override final;
 
-protected:
-	virtual ~lambertian() = default;
+	virtual ~Lambertian() = default;
 
-private:
-	vec3 albedo;
+	color3 albedo;
 };
 
 
-class metal : public material
+
+class Metal : public Material
 {
 public:
-	explicit metal(const vec3& a, const float f) : albedo(a) {if(f < 1.0f) {fuzz = f;}}
-	bool scatter(const ray& r, const hit_record& rec,
+	explicit Metal(const color3& a, const double f) : albedo(a), fuzz(f < 1.0 ? f : 1.0) {}
+	bool Scatter(const ray& r, const HitRecord& rec,
 		vec3& attenuation, ray& scattered) const override final;
 
-protected:
-	virtual ~metal() = default;
+	virtual ~Metal() = default;
 
-private:
-	vec3 albedo;
-	float fuzz = 1.0f;
+	color3 albedo;
+	double fuzz;
 };
 
 
-class dialectric : public material
+
+class Dielectric : public Material
 {
 public:
-	explicit dialectric(const float ri) : refIdx(ri)  {}
-	bool scatter(const ray& r, const hit_record& rec,
+	explicit Dielectric(const double ri) : refIdx(ri)  {}
+	bool Scatter(const ray& r, const HitRecord& rec,
 		vec3& attenuation, ray& scattered) const override final;
 
+	virtual ~Dielectric() = default;
 
-protected:
-	virtual ~dialectric() = default;
 
-private:
-	float refIdx;
+	double refIdx;
 };
 
 

@@ -1,12 +1,12 @@
 
 
 add_library(rtLib 
+	Material.cpp Material.h
 	casting.cpp casting.h
-	material.cpp material.h
 	camera.cpp camera.h
-	hitable_list.cpp hitable_list.h
-	sphere.cpp sphere.h
-	hitable.h
+	hittable_list.cpp hittable_list.h
+	sphere.cpp 	sphere.h
+	hittable.h
 	)
 
 target_include_directories(mathLib

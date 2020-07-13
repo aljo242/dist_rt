@@ -1,74 +1,66 @@
 #include "material.h"
 #include "casting.h"
-#include "rng.h"
+#include "common.h"
 
 using namespace mathLib;
 using namespace rtLib;
 
 
+double rtLib::Schlick(const double cosine, const double refIdx)
+{
+	auto r0 { (1.0 - refIdx) / (1.0 + refIdx) };
+	r0 = r0 * r0;
+	return r0 + (1.0 - r0) * std::pow((1.0 - cosine), 5.0);
+}
 
 
-bool lambertian::scatter(const ray& r, const hit_record& rec,
+bool Lambertian::Scatter(const ray& r, const HitRecord& rec,
 		vec3& attenuation, ray& scattered) const 
 {
-	vec3 target {rec.p + rec.normal + random_in_unit_sphere()};
-	scattered = ray(rec.p, target-rec.p);
+	const vec3 scatterDir {rec.normal + RandUnitVec()};
+	scattered = ray(rec.p, scatterDir);
 	attenuation = albedo;
 	return true;
 }
 
 
-bool metal::scatter(const ray& r, const hit_record& rec,
+bool Metal::Scatter(const ray& r, const HitRecord& rec,
 		vec3& attenuation, ray& scattered) const 
 {
-	vec3 reflected {reflect(unit_vector(r.direction()), rec.normal)};
-	scattered = ray(rec.p, reflected + fuzz * random_in_unit_sphere());
+	const vec3 reflected {Reflect(UnitVector(r.Direction()), rec.normal)};
+	scattered = ray(rec.p, reflected + fuzz * RandInUnitSphere());
 	attenuation = albedo;
-	return (dot(scattered.direction(), rec.normal) > 0.0f);
+	return (Dot(scattered.Direction(), rec.normal) > 0.0);
 }
 
 
-bool dialectric::scatter(const ray& r, const hit_record& rec, vec3& attenuation, ray& scattered) const
+bool Dielectric::Scatter(const ray& r, const HitRecord& rec, vec3& attenuation, ray& scattered) const
 {
-	vec3 outwardNorm;
-	vec3 reflected  {reflect(r.direction(), rec.normal)};
-	float ni_n0;
-	attenuation = vec3(1.0f, 1.0f, 0.0f);
-	vec3 refracted(0.0f, 0.0f, 0.0f);  
-	float reflectProb {0.0f};
-	float cosine;
-	rando rand;
-	if (dot(r.direction(), rec.normal) > 0.0f)
+	attenuation = color3(1.0, 1.0, 1.0);
+	const double refRatio {(rec.frontFace) ? (1.0/refIdx) : (refIdx)};
+	const auto unitDir {UnitVector(r.Direction())};
+
+	const double cosTheta {std::fmin(Dot(-unitDir, rec.normal), 1.0)};
+	const double sinTheta {std::sqrt(1.0 - cosTheta * cosTheta)};
+
+	if(refRatio * sinTheta > 1.0)
 	{
-		outwardNorm = -rec.normal;
-		ni_n0 = refIdx;
-		cosine = dot(r.direction(), rec.normal) / r.direction().length();
-		cosine = std::sqrt(1.0f - refIdx * refIdx * (1.0f - cosine * cosine));
-	}
-	else
-	{
-		outwardNorm = rec.normal;
-		ni_n0 = 1.0f / refIdx;
-		cosine =  - dot(r.direction(), rec.normal) / r.direction().length();
+		const vec3 reflected {Reflect(unitDir, rec.normal)};
+		scattered = ray(rec.p, reflected);
+		return true;
 	}
 
-	if (refract(r.direction(), outwardNorm, ni_n0, refracted))
+	const auto reflectProb {Schlick(cosTheta, refRatio)};
+	if (RandDouble() < reflectProb)
 	{
-		reflectProb = schlick(cosine, refIdx);
-	}
-	else 
-	{
-		reflectProb = 1.0f;
+		const vec3 reflected {Reflect(unitDir, rec.normal)};
+		scattered = ray(rec.p, reflected);
+		return true;
 	}
 
-	if (static_cast<float>(rand.genRand()) < reflectProb)
-	{
-		scattered = ray(rec.p, reflected); 
-	}
-	else 
-	{
-		scattered = ray(rec.p, refracted);
-	}
+	const vec3 refracted {Refract(unitDir, rec.normal, refRatio)};
+	scattered = ray(rec.p, refracted);
 	return true;
+
 }
 

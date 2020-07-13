@@ -2,11 +2,11 @@
 
 using namespace mathLib;
 
-ray::ray(const vec3& a, const vec3& b)
-	:
-	A(a),
-	B(b)
-{}
+ray::ray(const point3& o, const vec3& d)
+	: origin(o), dir(d), tm(0.0) {}
 
+ray::ray(const point3& o, const vec3& d, const double time)
+	: origin(o), dir(d), tm(time) {}
+ 
 
-vec3 ray::point_at_parameter(const float t) const { return A + (B*t); }
+vec3 ray::At(const double t) const { return origin + (dir*t); }
