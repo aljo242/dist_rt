@@ -18,7 +18,9 @@ public:
 		const double vFOV, 
 		const double aspectRatio,
 		const double aperture,
-		const double focusDist);
+		const double focusDist,
+		const double t0 = 0.0,
+		const double t1 = 0.0);
 
 	ray GetRay(const double s, const double t) const;
 
@@ -30,6 +32,7 @@ private:
 	vec3 vertical;
 	vec3 u, v, w;
 	double lensRadius;
+	double time0, time1; // shutter open/close times
 };
 
 } // namespace rtLib

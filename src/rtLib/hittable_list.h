@@ -14,10 +14,10 @@ class hittable_list : public hittable
 {
 public:
 	hittable_list() = default;
-	explicit hittable_list(std::shared_ptr<hittable> obj);
+	explicit hittable_list(const std::shared_ptr<hittable>& obj);
 
 	void Clear();
-	void Add(std::shared_ptr<hittable> obj);
+	void Add(const std::shared_ptr<hittable>& obj);
 
 
 	virtual bool Hit(const ray& r, const double t_min, 

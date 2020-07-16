@@ -1,20 +1,23 @@
-#include <iostream>
 #include <fstream>
-#include <string>
+#include <iostream>
 #include <spdlog/spdlog.h>
+#include <string>
 
-#include "common.h"
-#include "vec3.h"
-#include "ray.h"
 #include "color.h"
+#include "common.h"
+#include "ray.h"
+#include "vec3.h"
 using namespace mathLib;
 
 #include "Material.h"
-#include "hittable_list.h"
-#include "sphere.h"
 #include "camera.h"
 #include "casting.h"
+#include "hittable_list.h"
+#include "sphere.h"
 using namespace rtLib;
+
+constexpr double T0 {0.0};
+constexpr double T1 {1.0};
 
 hittable_list GenerateRandomScene()
 {
@@ -39,7 +42,9 @@ hittable_list GenerateRandomScene()
 					// lambertian
 					const auto albedo 	{color3::Random() * color3::Random()};
 					sphereMat = std::make_shared<Lambertian>(albedo);
-					world.Add(std::make_shared<sphere>(center, 0.2, sphereMat));
+
+					const auto center2	{center + vec3(0.0, RandDouble(0.0, 0.5), 0.0)};
+					world.Add(std::make_shared<moving_sphere>(center, center2, T0, T1, 0.2, sphereMat));
 				}
 				else if (chooseMat < 0.95)
 				{
@@ -105,7 +110,7 @@ color3 RayColor(const ray& r, const hittable& world, const int depth)
 int main()
 {
 	constexpr double aspectRatio 		{16.0 / 9.0};
-	constexpr int imageW 				{1280};
+	constexpr int imageW 				{640};
 	constexpr int imageH 				{static_cast<int>(imageW / aspectRatio)};
 	const std::string fileName			{"output.ppm"};
 	constexpr int samplesPerPixel 		{100};
@@ -133,11 +138,11 @@ int main()
 	const point3 lookat(0,0, 0);
 	const vec3 vup(0,1,0);
 	constexpr auto dist_to_focus 	{10};
-	constexpr auto aperture 		{0.1};
+	constexpr auto aperture 		{0.0};
 	constexpr double FOV			{20};
 
 
-	camera cam(lookfrom, lookat, vup, FOV, aspectRatio, aperture, dist_to_focus);
+	camera cam(lookfrom, lookat, vup, FOV, aspectRatio, aperture, dist_to_focus, T0, T1);
 
 	for (int j = imageH; j > 0; --j)
 	{

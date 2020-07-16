@@ -41,3 +41,48 @@ bool sphere::Hit(const ray& r, const double t_min,
 	}
 	return false;
 }
+
+
+bool moving_sphere::Hit(const ray& r, const double t_min, 
+	const double t_max, HitRecord& rec) const 
+{
+	const auto oc 			{r.Origin() - center(r.Time())};
+	const auto a 			{r.Direction().SquaredLength()};
+	const auto half_b 		{Dot(oc, r.Direction())};
+	const auto c 			{oc.SquaredLength() - radius*radius};
+	const auto discriminant {half_b * half_b - a * c};
+	if (discriminant > 0.0)
+	{
+		const auto root {std::sqrt(discriminant)};
+
+		auto temp 		{(-half_b - root) / a};
+		if ((temp < t_max) && (temp > t_min))
+		{
+			rec.t = temp;
+			rec.p = r.At(rec.t);
+			const vec3 outwardNorm {(rec.p - center(r.Time())) / radius};
+			rec.SetFaceNormal(r, outwardNorm);
+			// if a ray hits this sphere, set its material pointer to my matieral
+			rec.pMat = pMat;	
+			return true;
+		}
+
+		temp = (-half_b + root) / a;
+		if ((temp < t_max) && (temp > t_min))
+		{
+			rec.t = temp;
+			rec.p = r.At(rec.t);
+			const vec3 outwardNorm {(rec.p - center(r.Time())) / radius};
+			rec.SetFaceNormal(r, outwardNorm);
+			// if a ray hits this sphere, set its material pointer to my matieral
+			rec.pMat = pMat;
+			return true;
+		}
+	}
+	return false;
+}
+
+point3 moving_sphere::center(const double time) const 
+{
+	return center0 + ((time - time0) / (time1 - time0)) * (center1 - center0);
+}

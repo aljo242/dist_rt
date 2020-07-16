@@ -9,8 +9,7 @@ class ray
 {
 public:
 	ray() = default;
-	ray(const point3& o, const vec3& d);
-	ray(const point3& o, const vec3& d, const double time);
+	ray(const point3& o, const vec3& d, const double time = 0.0);
 
 	inline point3 Origin() const 	{return origin;}
 	inline vec3 Direction() const 	{return dir;}

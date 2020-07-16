@@ -5,11 +5,11 @@ using namespace mathLib;
 
 using namespace rtLib;
 
-hittable_list::hittable_list(std::shared_ptr<hittable> obj) {Add(obj);}
+hittable_list::hittable_list(const std::shared_ptr<hittable>& obj) {Add(obj);}
 
 void hittable_list::Clear() {objects.clear();}
 
-void hittable_list::Add(std::shared_ptr<hittable> obj) {objects.push_back(obj);}
+void hittable_list::Add(const std::shared_ptr<hittable>& obj) {objects.push_back(obj);}
 
 bool hittable_list::Hit(const ray& r, const double t_min, 
 	const double t_max, HitRecord& rec) const 

@@ -6,11 +6,14 @@ using namespace mathLib;
 using namespace rtLib;
 
 
+
+
 double rtLib::Schlick(const double cosine, const double refIdx)
 {
+	constexpr double SCHLICK_FACTOR {5.0};
 	auto r0 { (1.0 - refIdx) / (1.0 + refIdx) };
 	r0 = r0 * r0;
-	return r0 + (1.0 - r0) * std::pow((1.0 - cosine), 5.0);
+	return r0 + (1.0 - r0) * std::pow((1.0 - cosine), SCHLICK_FACTOR);
 }
 
 
@@ -18,7 +21,7 @@ bool Lambertian::Scatter(const ray& r, const HitRecord& rec,
 		vec3& attenuation, ray& scattered) const 
 {
 	const vec3 scatterDir {rec.normal + RandUnitVec()};
-	scattered = ray(rec.p, scatterDir);
+	scattered = ray(rec.p, scatterDir, r.Time());
 	attenuation = albedo;
 	return true;
 }
@@ -28,7 +31,7 @@ bool Metal::Scatter(const ray& r, const HitRecord& rec,
 		vec3& attenuation, ray& scattered) const 
 {
 	const vec3 reflected {Reflect(UnitVector(r.Direction()), rec.normal)};
-	scattered = ray(rec.p, reflected + fuzz * RandInUnitSphere());
+	scattered = ray(rec.p, reflected + fuzz * RandInUnitSphere(), r.Time());
 	attenuation = albedo;
 	return (Dot(scattered.Direction(), rec.normal) > 0.0);
 }
@@ -46,7 +49,7 @@ bool Dielectric::Scatter(const ray& r, const HitRecord& rec, vec3& attenuation, 
 	if(refRatio * sinTheta > 1.0)
 	{
 		const vec3 reflected {Reflect(unitDir, rec.normal)};
-		scattered = ray(rec.p, reflected);
+		scattered = ray(rec.p, reflected, r.Time());
 		return true;
 	}
 
@@ -54,12 +57,12 @@ bool Dielectric::Scatter(const ray& r, const HitRecord& rec, vec3& attenuation, 
 	if (RandDouble() < reflectProb)
 	{
 		const vec3 reflected {Reflect(unitDir, rec.normal)};
-		scattered = ray(rec.p, reflected);
+		scattered = ray(rec.p, reflected, r.Time());
 		return true;
 	}
 
 	const vec3 refracted {Refract(unitDir, rec.normal, refRatio)};
-	scattered = ray(rec.p, refracted);
+	scattered = ray(rec.p, refracted, r.Time());
 	return true;
 
 }

@@ -10,7 +10,7 @@ vec3 rtLib::RandInUnitDisk()
 	while(true)
 	{
 		const auto p {vec3(RandDouble(-1.0, 1.0), RandDouble(-1.0, 1.0), 0.0)};
-		if (p.SquaredLength() >= 1.0) continue;
+		if (p.SquaredLength() >= 1.0) {continue;}
 		return p;
 	}
 }
@@ -21,7 +21,7 @@ vec3 rtLib::RandUnitVec()
 	const auto a {RandDouble(0.0, 2*pi)};
 	const auto z {RandDouble(-1.0, 1.0)};
 	const auto r {std::sqrt(1.0 - z*z)};
-	return vec3(r*std::cos(a), r*std::sin(a), z);
+	return {r*std::cos(a), r*std::sin(a), z};
 }
 
 
@@ -30,7 +30,7 @@ vec3 rtLib::RandInUnitSphere()
 	while(true)
 	{
 		const auto p {vec3::Random(-1.0, 1.0)};
-		if (p.SquaredLength() >= 1.0) continue;
+		if (p.SquaredLength() >= 1.0) {continue;}
 		return p;
 	}
 }
