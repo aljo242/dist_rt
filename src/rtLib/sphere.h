@@ -22,6 +22,9 @@ public:
 
 	virtual bool Hit(const ray& r, const double t_min, 
 		const double t_max, HitRecord& rec) const override;
+
+	virtual bool BoundingBox(const double t0, const double t1, 
+		AABB& outputBox) const override;
 	
 	virtual ~sphere() = default;
 
@@ -45,6 +48,9 @@ public:
 	virtual bool Hit(const ray& r, const double t_min, 
 		const double t_max, HitRecord& rec) const override;
 
+	virtual bool BoundingBox(const double t0, const double t1, 
+		AABB& outputBox) const override;
+
 	point3 center(const double time) const;
 
 	virtual ~moving_sphere() = default;
@@ -55,6 +61,11 @@ public:
 	 double radius;
 	 std::shared_ptr<Material> pMat;
 };
+
+
+
+// utility
+void GetSphereUV(const vec3& p, double& u, double& v);
 
 
 } // namespace mathLib

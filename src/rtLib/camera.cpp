@@ -39,7 +39,8 @@ ray camera::GetRay(const double s, const double t) const
 {
 	const vec3 rd 		{lensRadius * RandInUnitDisk()};
 	const vec3 offset	{u * rd.x() + v * rd.y()};	
-	return {origin + offset, 
+	return {
+		origin + offset, 
 		lowerLeftCorner + s*horizontal + t*vertical - origin - offset, 
 		RandDouble(time0, time1)
 	};

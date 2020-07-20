@@ -31,3 +31,29 @@ bool hittable_list::Hit(const ray& r, const double t_min,
 	return hitAnything;
 }
 
+
+bool hittable_list::BoundingBox(const double t0, const double t1, 
+	AABB& outputBox) const 
+{
+	if (objects.empty()) 
+	{
+		return false;
+	}
+
+	AABB tempBox;
+	bool firstBox {true};
+
+	for (const auto& obj : objects)
+	{
+		if (!obj->BoundingBox(t0, t1, tempBox))
+		{
+			return false;
+		}
+
+		outputBox = firstBox ? tempBox : mathLib::SurroundingBox(outputBox, tempBox);
+		firstBox = false;
+	}
+
+	return true;
+}
+

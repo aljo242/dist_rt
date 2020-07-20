@@ -23,6 +23,9 @@ public:
 	virtual bool Hit(const ray& r, const double t_min, 
 		const double t_max, HitRecord& rec) const override;
 
+	virtual bool BoundingBox(const double t0, const double t1, 
+		AABB& outputBox) const override;
+
 	virtual ~hittable_list() = default;
 
 

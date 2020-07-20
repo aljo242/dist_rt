@@ -56,6 +56,11 @@ inline double RandInt(const int min, const int max)
 	return static_cast<int>(RandDouble(static_cast<double>(min), static_cast<double>(max+1)));
 }
 
+inline int RandomInt(const int min, const int max)
+{
+	return static_cast<int>(RandDouble(min, max+1));
+}
+
 } // namespace mathLib
 
 

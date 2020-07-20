@@ -10,6 +10,7 @@
 using namespace mathLib;
 
 #include "Material.h"
+#include "Texture.h"
 #include "camera.h"
 #include "casting.h"
 #include "hittable_list.h"
@@ -22,8 +23,12 @@ constexpr double T1 {1.0};
 hittable_list GenerateRandomScene()
 {
 	hittable_list world;
+	const auto checkerFloor {std::make_shared<CheckerBoard>(
+		std::make_shared<Solid_Color>(0.2, 0.3, 0.1),
+		std::make_shared<Solid_Color>(0.9, 0.9, 0.9)
+		)};
 
-	const auto groundMat {std::make_shared<Lambertian>(color3(0.5, 0.5, 0.5))};
+	const auto groundMat {std::make_shared<Lambertian>(checkerFloor)};
 	world.Add(std::make_shared<sphere>(point3(0, -1000, 0), 1000, groundMat));
 
 	for (int a = -11; a < 11; ++a)
@@ -40,8 +45,8 @@ hittable_list GenerateRandomScene()
 				if (chooseMat < 0.8)
 				{
 					// lambertian
-					const auto albedo 	{color3::Random() * color3::Random()};
-					sphereMat = std::make_shared<Lambertian>(albedo);
+					const auto al 	{color3::Random() * color3::Random()};
+					sphereMat = std::make_shared<Lambertian>(std::make_shared<Solid_Color>(al.r(), al.g(), al.b()));
 
 					const auto center2	{center + vec3(0.0, RandDouble(0.0, 0.5), 0.0)};
 					world.Add(std::make_shared<moving_sphere>(center, center2, T0, T1, 0.2, sphereMat));
@@ -67,7 +72,7 @@ hittable_list GenerateRandomScene()
 	auto material1 = std::make_shared<Dielectric>(1.5);
     world.Add(std::make_shared<sphere>(point3(0, 1, 0), 1.0, material1));
 
-    auto material2 = std::make_shared<Lambertian>(color3(0.4, 0.2, 0.1));
+    auto material2 = std::make_shared<Lambertian>(std::make_shared<Solid_Color>(0.4, 0.2, 0.1));
     world.Add(std::make_shared<sphere>(point3(-4, 1, 0), 1.0, material2));
 
     auto material3 = std::make_shared<Metal>(color3(0.7, 0.6, 0.5), 0.0);
@@ -77,6 +82,17 @@ hittable_list GenerateRandomScene()
 	return world;
 }
 
+
+hittable_list TwoPerlinSpheres()
+{
+	hittable_list world;
+
+	const auto perlinTex 	{std::make_shared<Perlin_Noise>(10)};
+	world.Add(std::make_shared<sphere>(point3(0, -1000, 0), 1000, std::make_shared<Lambertian>(perlinTex)));
+	world.Add(std::make_shared<sphere>(point3(0, 2, 0), 2, std::make_shared<Lambertian>(perlinTex)));
+
+	return world;
+}
 
 
 color3 RayColor(const ray& r, const hittable& world, const int depth)
@@ -110,7 +126,7 @@ color3 RayColor(const ray& r, const hittable& world, const int depth)
 int main()
 {
 	constexpr double aspectRatio 		{16.0 / 9.0};
-	constexpr int imageW 				{640};
+	constexpr int imageW 				{1280};
 	constexpr int imageH 				{static_cast<int>(imageW / aspectRatio)};
 	const std::string fileName			{"output.ppm"};
 	constexpr int samplesPerPixel 		{100};
@@ -122,17 +138,7 @@ int main()
 
 	oFile << "P3\n" << imageW << ' ' << imageH << ' ' << "\n255\n";
 
-	auto world {GenerateRandomScene()};
-
-	
-	world.Add(std::make_shared<sphere>(
-        point3(0,0,-1), 0.5, std::make_shared<Lambertian>(color3(0.7, 0.3, 0.3))));
-
-    world.Add(std::make_shared<sphere>(
-        point3(0,-100.5,-1), 100, std::make_shared<Lambertian>(color3(0.8, 0.8, 0.0))));
-
-    world.Add(std::make_shared<sphere>(point3(1,0,-1), 0.5, std::make_shared<Metal>(color3(.8,.6,.2), 0.3)));
-    world.Add(std::make_shared<sphere>(point3(-1,0,-1), 0.5, std::make_shared<Metal>(color3(.8,.8,.8), 0.3)));
+	auto world {TwoPerlinSpheres()};
 	
 	const point3 lookfrom(13,2,3);
 	const point3 lookat(0,0, 0);
@@ -140,7 +146,6 @@ int main()
 	constexpr auto dist_to_focus 	{10};
 	constexpr auto aperture 		{0.0};
 	constexpr double FOV			{20};
-
 
 	camera cam(lookfrom, lookat, vup, FOV, aspectRatio, aperture, dist_to_focus, T0, T1);
 

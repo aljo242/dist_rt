@@ -4,7 +4,9 @@
 #include "common.h"
 #include "vec3.h"
 #include "ray.h"
+
 #include "hittable_list.h"
+#include "Texture.h"
 
 namespace rtLib
 {
@@ -28,13 +30,13 @@ public:
 class Lambertian : public Material
 {
 public:
-	explicit Lambertian(const color3& a) : albedo(a) {}
+	explicit Lambertian(std::shared_ptr<Texture> a) : albedo(a) {}
 	bool Scatter(const ray& r, const HitRecord& rec,
 		vec3& attenuation, ray& scattered) const override final;
 
 	virtual ~Lambertian() = default;
 
-	color3 albedo;
+	std::shared_ptr<Texture> albedo;
 };
 
 

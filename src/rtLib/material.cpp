@@ -22,7 +22,7 @@ bool Lambertian::Scatter(const ray& r, const HitRecord& rec,
 {
 	const vec3 scatterDir {rec.normal + RandUnitVec()};
 	scattered = ray(rec.p, scatterDir, r.Time());
-	attenuation = albedo;
+	attenuation = albedo->Value(rec.u, rec.v, rec.p);
 	return true;
 }
 
