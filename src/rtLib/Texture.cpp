@@ -82,5 +82,6 @@ color3 rtLib::Image_Tex::Value(const double u, const double v, const point3& p) 
 
 	return {(COLOR_SCALE * data[pixelOffset + 0]), 
 			(COLOR_SCALE * data[pixelOffset + 1]), 
-			(COLOR_SCALE * data[pixelOffset + 2])};
+			(COLOR_SCALE * data[pixelOffset + 2])
+		};
 }

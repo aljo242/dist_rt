@@ -120,7 +120,6 @@ color3 RayColor(const ray& r, const hittable& world, const int depth)
 		return color3(0.0, 0.0, 0.0);
 	}
 
-
 	if (world.Hit(r, 0.001, infinity, rec))
 	{
 		ray scattered;

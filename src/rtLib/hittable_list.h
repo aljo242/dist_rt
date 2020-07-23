@@ -26,7 +26,7 @@ public:
 	virtual bool BoundingBox(const double t0, const double t1, 
 		AABB& outputBox) const override;
 
-	virtual ~hittable_list() = default;
+	//virtual ~hittable_list() = default;
 
 
 	std::vector<std::shared_ptr<hittable>> objects;
