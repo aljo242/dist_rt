@@ -32,7 +32,7 @@ public:
 
 	virtual color3 Value(const double u, const double v, const point3& p) const override;
 
-	virtual ~Solid_Color() = default;
+	//virtual ~Solid_Color() = default;
 
 private:
 	color3 col;
@@ -48,7 +48,7 @@ public:
 
 	virtual color3 Value(const double u, const double v, const point3& p) const override;
 
-	virtual ~CheckerBoard() = default;
+	//virtual ~CheckerBoard() = default;
 
 private:	
 	std::shared_ptr<Texture> even;
@@ -64,7 +64,7 @@ public:
 
 	virtual color3 Value(const double u, const double v, const point3& p) const override;
 
-	virtual ~Perlin_Noise() = default;
+	//virtual ~Perlin_Noise() = default;
 
 private:
 	Perlin noise;
@@ -75,18 +75,17 @@ private:
 class Image_Tex : public Texture
 {
 public:
-	const static int bytesPerPixel {3};
+	constexpr static int bytesPerPixel {3};
 
 	Image_Tex() : data(nullptr), width(0), height(0), bytesPerScanline(0) {}
-	Image_Tex(const std::string& filename);
+	Image_Tex(const char* filename);
 
 	virtual ~Image_Tex()
 	{
-		delete[] data;
+		delete data;
 	}
 
 	virtual color3 Value(const double u, const double v, const point3& p) const override;
-
 
 private:
 	unsigned char* data;

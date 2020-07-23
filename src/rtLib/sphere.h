@@ -26,7 +26,7 @@ public:
 	virtual bool BoundingBox(const double t0, const double t1, 
 		AABB& outputBox) const override;
 	
-	virtual ~sphere() = default;
+	//virtual ~sphere() = default;
 
 	point3 center;
 	double radius;
@@ -53,7 +53,7 @@ public:
 
 	point3 center(const double time) const;
 
-	virtual ~moving_sphere() = default;
+	//virtual ~moving_sphere() = default;
 
 public:
 	 point3 center0, center1;

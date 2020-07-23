@@ -20,6 +20,8 @@ using namespace rtLib;
 constexpr double T0 {0.0};
 constexpr double T1 {1.0};
 
+const std::string resFilePath {".."};
+
 hittable_list GenerateRandomScene()
 {
 	hittable_list world;
@@ -95,6 +97,19 @@ hittable_list TwoPerlinSpheres()
 }
 
 
+hittable_list Earth()
+{
+	hittable_list world;
+
+	const auto earthTex 		{std::make_shared<Image_Tex>("earthmap.jpg")};
+	const auto earthSurface 	{std::make_shared<Lambertian>(earthTex)};
+	const auto globe			{std::make_shared<sphere>(point3(0,0,0), 2, earthSurface)};
+	world.Add(globe);
+
+	return world;
+}
+
+
 color3 RayColor(const ray& r, const hittable& world, const int depth)
 {
 	HitRecord rec;
@@ -126,10 +141,10 @@ color3 RayColor(const ray& r, const hittable& world, const int depth)
 int main()
 {
 	constexpr double aspectRatio 		{16.0 / 9.0};
-	constexpr int imageW 				{1280};
+	constexpr int imageW 				{100};
 	constexpr int imageH 				{static_cast<int>(imageW / aspectRatio)};
 	const std::string fileName			{"output.ppm"};
-	constexpr int samplesPerPixel 		{100};
+	constexpr int samplesPerPixel 		{1};
 	constexpr int maxDepth 				{50};
 
 	spdlog::info("Writing to file {}...", fileName);
@@ -138,20 +153,42 @@ int main()
 
 	oFile << "P3\n" << imageW << ' ' << imageH << ' ' << "\n255\n";
 
-	auto world {TwoPerlinSpheres()};
-	
-	const point3 lookfrom(13,2,3);
-	const point3 lookat(0,0, 0);
+	point3 lookfrom(13,2,3);
+	point3 lookat(0,0, 0);
 	const vec3 vup(0,1,0);
-	constexpr auto dist_to_focus 	{10};
-	constexpr auto aperture 		{0.0};
+	auto dist_to_focus 	{10};
+	auto aperture 					{0.0};
 	constexpr double FOV			{20};
+
+	int chooseWorld 				{0};
+	spdlog::info("Choose the world to generate:\n\n(1)\tLarge world with many objects\n(2)\tSmall world with 2 textured spheres\n(3)\tEarth textured sphere");
+	std::cin >> chooseWorld;
+	hittable_list world;
+
+	switch(chooseWorld)
+	{
+		spdlog::info({}, chooseWorld);
+		case 1:
+			spdlog::info("(1)\tLarge world with many objects");
+			world = GenerateRandomScene();
+			break;
+		default:
+		case 2:
+			spdlog::info("(2)\tSmall world with 2 textured spheres");
+			world = TwoPerlinSpheres();
+			aperture = 0.1;
+			break;
+		case 3:
+			spdlog::info("(3)\tEarth textured sphere");
+			world = Earth();
+			break;
+	}	
 
 	camera cam(lookfrom, lookat, vup, FOV, aspectRatio, aperture, dist_to_focus, T0, T1);
 
 	for (int j = imageH; j > 0; --j)
 	{
-		spdlog::info("Scanlines remaining: {}\n", j);
+		spdlog::info("Scanlines remaining: {}", j);
 		for (int i = 0; i < imageW; ++i)
 		{
 			color3 pixCol(0.0, 0.0, 0.0);

@@ -34,7 +34,7 @@ public:
 	bool Scatter(const ray& r, const HitRecord& rec,
 		vec3& attenuation, ray& scattered) const override final;
 
-	virtual ~Lambertian() = default;
+	//virtual ~Lambertian() = default;
 
 	std::shared_ptr<Texture> albedo;
 };
@@ -48,7 +48,7 @@ public:
 	bool Scatter(const ray& r, const HitRecord& rec,
 		vec3& attenuation, ray& scattered) const override final;
 
-	virtual ~Metal() = default;
+	//virtual ~Metal() = default;
 
 	color3 albedo;
 	double fuzz;
@@ -63,8 +63,7 @@ public:
 	bool Scatter(const ray& r, const HitRecord& rec,
 		vec3& attenuation, ray& scattered) const override final;
 
-	virtual ~Dielectric() = default;
-
+	//virtual ~Dielectric() = default;
 
 	double refIdx;
 };
