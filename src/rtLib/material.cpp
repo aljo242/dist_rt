@@ -6,8 +6,6 @@ using namespace mathLib;
 using namespace rtLib;
 
 
-
-
 double rtLib::Schlick(const double cosine, const double refIdx)
 {
 	constexpr double SCHLICK_FACTOR {5.0};
@@ -67,3 +65,13 @@ bool Dielectric::Scatter(const ray& r, const HitRecord& rec, vec3& attenuation, 
 
 }
 
+
+bool Diffuse_Light::Scatter(const ray& r, const HitRecord& rec, vec3& attenuation, ray& scattered) const
+{
+	return false;
+}
+
+color3 Diffuse_Light::Emitted(const double u, const double v, const point3& p) const
+{
+	return emit->Value(u,v,p);
+}

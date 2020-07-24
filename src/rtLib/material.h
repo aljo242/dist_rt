@@ -21,6 +21,11 @@ public:
 	virtual bool Scatter(const ray& r, const HitRecord& rec,
 		vec3& attenuation, ray& scattered) const = 0;
 
+	virtual color3 Emitted(const double u, const double v, const point3& p) const
+	{
+		return {0.0, 0.0, 0.0};
+	}
+
 	virtual ~Material() = default;
 
 };
@@ -33,6 +38,8 @@ public:
 	explicit Lambertian(std::shared_ptr<Texture> a) : albedo(a) {}
 	bool Scatter(const ray& r, const HitRecord& rec,
 		vec3& attenuation, ray& scattered) const override final;
+
+
 
 	//virtual ~Lambertian() = default;
 
@@ -66,6 +73,22 @@ public:
 	//virtual ~Dielectric() = default;
 
 	double refIdx;
+};
+
+
+class Diffuse_Light : public Material 
+{
+public:
+	Diffuse_Light(std::shared_ptr<Texture> a) : emit(a) {}
+	Diffuse_Light(const color3& col) : emit(std::make_shared<Solid_Color>(col)) {}
+
+	bool Scatter(const ray& r, const HitRecord& rec,
+		vec3& attenuation, ray& scattered) const override final;
+
+	virtual color3 Emitted(const double u, const double v, const point3& p) const override final;
+
+private:
+	std::shared_ptr<Texture> emit;
 };
 
 

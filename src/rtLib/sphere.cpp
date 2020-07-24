@@ -4,6 +4,16 @@
 using namespace mathLib;
 using namespace rtLib;
 
+
+void GetSphereUV(const point3& p, double& u, double& v)
+{
+	const auto phi		{std::atan2(p.z(), p.x())};
+	const auto theta	{std::asin(p.y())};
+
+	u = 1.0 - (phi + pi) / (2*pi);
+	v = (theta + pi/2) / pi;
+}
+
 bool sphere::Hit(const ray& r, const double t_min, 
 		const double t_max, HitRecord& rec) const 
 {
@@ -12,6 +22,7 @@ bool sphere::Hit(const ray& r, const double t_min,
 	const auto half_b 		{Dot(oc, r.Direction())};
 	const auto c 			{oc.SquaredLength() - radius*radius};
 	const auto discriminant {half_b * half_b - a * c};
+
 	if (discriminant > 0.0)
 	{
 		const auto root {std::sqrt(discriminant)};
@@ -23,6 +34,7 @@ bool sphere::Hit(const ray& r, const double t_min,
 			rec.p = r.At(rec.t);
 			const vec3 outwardNorm {(rec.p - center) / radius};
 			rec.SetFaceNormal(r, outwardNorm);
+			GetSphereUV((rec.p - center)/radius, rec.u, rec.v);
 			// if a ray hits this sphere, set its material pointer to my matieral
 			rec.pMat = pMat;	
 			return true;
@@ -35,6 +47,7 @@ bool sphere::Hit(const ray& r, const double t_min,
 			rec.p = r.At(rec.t);
 			const vec3 outwardNorm {(rec.p - center) / radius};
 			rec.SetFaceNormal(r, outwardNorm);
+			GetSphereUV((rec.p - center)/radius, rec.u, rec.v);
 			// if a ray hits this sphere, set its material pointer to my matieral
 			rec.pMat = pMat;
 			return true;

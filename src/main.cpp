@@ -110,7 +110,22 @@ hittable_list Earth()
 }
 
 
-color3 RayColor(const ray& r, const hittable& world, const int depth)
+hittable_list SimpleLight()
+{
+	hittable_list world;
+
+	const auto perlinTex		{std::make_shared<Perlin_Noise>(4)};
+	world.Add(std::make_shared<sphere>(point3(0, -1000, 0), 1000, std::make_shared<Lambertian>(perlinTex)));
+	world.Add(std::make_shared<sphere>(point3(0, 2, 0), 2, std::make_shared<Lambertian>(perlinTex)));
+
+	const auto diffLight		{std::make_shared<Diffuse_Light>(color3(4,4,4))};
+	world.Add(std::make_shared<sphere>(point3(0,7,0), 2, diffLight));
+
+	return world;
+}
+
+
+color3 RayColor(const ray& r, const color3& background, const hittable& world, const int depth)
 {
 	HitRecord rec;
 
@@ -120,31 +135,34 @@ color3 RayColor(const ray& r, const hittable& world, const int depth)
 		return color3(0.0, 0.0, 0.0);
 	}
 
-	if (world.Hit(r, 0.001, infinity, rec))
+
+	if(!world.Hit(r, 0.001, infinity, rec))
 	{
-		ray scattered;
-		color3 attenuation;
-		if (rec.pMat->Scatter(r, rec, attenuation, scattered))
-		{
-			return attenuation * RayColor(scattered, world, depth - 1);
-		}
-		return color3(0.0, 0.0, 0.0);
+		return background;
 	}
 
-	const vec3 unitDir 	{UnitVector(r.Direction())};
-	const auto t 		{ 0.5 * (unitDir.y() + 1.0)};
-	return (1.0 - t) * color3(1.0, 1.0, 1.0) + t * color3(0.5, 0.7, 1.0);
+	ray scattered;
+	color3 attenuation;
+	color3 emitted 		{rec.pMat->Emitted(rec.u, rec.v, rec.p)};
+
+	if (!rec.pMat->Scatter(r, rec, attenuation, scattered))
+	{
+		return emitted;
+	}
+
+	return emitted + attenuation * RayColor(scattered, background, world, depth - 1);
 }
 
 
 int main()
 {
 	constexpr double aspectRatio 		{16.0 / 9.0};
-	constexpr int imageW 				{100};
+	constexpr int imageW 				{1280};
 	constexpr int imageH 				{static_cast<int>(imageW / aspectRatio)};
 	const std::string fileName			{"output.ppm"};
-	constexpr int samplesPerPixel 		{1};
+	constexpr int samplesPerPixel 		{200};
 	constexpr int maxDepth 				{50};
+	color3 background(0,0,0);			// black background
 
 	spdlog::info("Writing to file {}...", fileName);
 
@@ -160,7 +178,7 @@ int main()
 	constexpr double FOV			{20};
 
 	int chooseWorld 				{0};
-	spdlog::info("Choose the world to generate:\n\n(1)\tLarge world with many objects\n(2)\tSmall world with 2 textured spheres\n(3)\tEarth textured sphere");
+	spdlog::info("Choose the world to generate:\n\n(1)\tLarge world with many objects\n(2)\tSmall world with 2 textured spheres\n(3)\tEarth textured sphere\n(4)\tLight emitting test");
 	std::cin >> chooseWorld;
 	hittable_list world;
 
@@ -170,17 +188,28 @@ int main()
 		case 1:
 			spdlog::info("(1)\tLarge world with many objects");
 			world = GenerateRandomScene();
+			background = color3(0.7, 0.8, 1.0);
 			break;
-		default:
 		case 2:
 			spdlog::info("(2)\tSmall world with 2 textured spheres");
 			world = TwoPerlinSpheres();
+			background = color3(0.7, 0.8, 1.0);
 			aperture = 0.1;
 			break;
 		case 3:
 			spdlog::info("(3)\tEarth textured sphere");
+			background = color3(0.7, 0.8, 1.0);
 			world = Earth();
 			break;
+		case 4:
+			spdlog::info("(4)\tLight emitting test");
+			world = SimpleLight();
+			break;
+
+		default:
+			spdlog::info("\tNo objects - nothing selected");
+			background = color3(0.7, 0.8, 1.0);
+
 	}	
 
 	camera cam(lookfrom, lookat, vup, FOV, aspectRatio, aperture, dist_to_focus, T0, T1);
@@ -196,7 +225,7 @@ int main()
 				const double u 		{ (i + RandDouble()) / (imageW - 1) };
 				const double v 		{ (j + RandDouble()) / (imageH - 1) };
 				const ray r 		{cam.GetRay(u, v)};
-				pixCol += RayColor(r, world, maxDepth);
+				pixCol += RayColor(r, background, world, maxDepth);
 			}
 			WriteColor(oFile, pixCol, samplesPerPixel);
 		}

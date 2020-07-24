@@ -75,20 +75,20 @@ private:
 class Image_Tex : public Texture
 {
 public:
-	constexpr static int bytesPerPixel {3};
+	const static int bytesPerPixel {3};
 
 	Image_Tex() : data(nullptr), width(0), height(0), bytesPerScanline(0) {}
 	Image_Tex(const char* filename);
 
 	virtual ~Image_Tex()
 	{
-		delete data;
+		free(data);
 	}
 
 	virtual color3 Value(const double u, const double v, const point3& p) const override;
-
+	
 private:
-	unsigned char* data;
+	unsigned char *data;
 	int width;
 	int height;
 	int bytesPerScanline;
