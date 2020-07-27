@@ -1,6 +1,11 @@
 
 
 add_library(rtLib 
+	Constant_Medium.cpp		Constant_Medium.h
+	Rotate.cpp				Rotate.h
+	Translate.cpp			Translate.h
+	Box.cpp					Box.h
+	Axis_Aligned_Rect.cpp	Axis_Aligned_Rect.h
 	Texture.cpp				Texture.h
 	bounding_vol_node.cpp 	bounding_vol_node.h
 	Material.cpp 			Material.h

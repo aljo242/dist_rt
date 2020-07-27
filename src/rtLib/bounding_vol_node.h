@@ -37,7 +37,7 @@ private:
 };
 
 
-inline bool BoxCompare(const std::shared_ptr<hittable> a, const std::shared_ptr<hittable> b, const int axis)
+inline bool BoxCompare(const std::shared_ptr<hittable> a, const std::shared_ptr<hittable> b, const size_t axis)
 {
 	AABB boxA;
 	AABB boxB;

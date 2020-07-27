@@ -36,6 +36,7 @@ class Lambertian : public Material
 {
 public:
 	explicit Lambertian(std::shared_ptr<Texture> a) : albedo(a) {}
+	explicit Lambertian(const color3& a) : albedo(std::make_shared<Solid_Color>(a)) {}
 	bool Scatter(const ray& r, const HitRecord& rec,
 		vec3& attenuation, ray& scattered) const override final;
 
@@ -89,6 +90,20 @@ public:
 
 private:
 	std::shared_ptr<Texture> emit;
+};
+
+
+class Isotropic : public Material
+{
+public:
+	Isotropic(const color3& col) : albedo(std::make_shared<Solid_Color>(col)) {}
+	Isotropic(std::shared_ptr<Texture> a) : albedo(a) {}
+
+	bool Scatter(const ray& r, const HitRecord& rec,
+		vec3& attenuation, ray& scattered) const override final;
+
+private:
+	std::shared_ptr<Texture> albedo;
 };
 
 

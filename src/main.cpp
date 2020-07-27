@@ -5,124 +5,15 @@
 
 #include "color.h"
 #include "common.h"
-#include "ray.h"
-#include "vec3.h"
 using namespace mathLib;
 
-#include "Material.h"
-#include "Texture.h"
 #include "camera.h"
 #include "casting.h"
-#include "hittable_list.h"
-#include "sphere.h"
+#include "Scene.h"
+#include "Material.h"
 using namespace rtLib;
 
-constexpr double T0 {0.0};
-constexpr double T1 {1.0};
-
-const std::string resFilePath {".."};
-
-hittable_list GenerateRandomScene()
-{
-	hittable_list world;
-	const auto checkerFloor {std::make_shared<CheckerBoard>(
-		std::make_shared<Solid_Color>(0.2, 0.3, 0.1),
-		std::make_shared<Solid_Color>(0.9, 0.9, 0.9)
-		)};
-
-	const auto groundMat {std::make_shared<Lambertian>(checkerFloor)};
-	world.Add(std::make_shared<sphere>(point3(0, -1000, 0), 1000, groundMat));
-
-	for (int a = -11; a < 11; ++a)
-	{
-		for (int b = -11; b < 11; ++b)
-		{
-			const auto chooseMat {RandDouble()};
-			const point3 center(a + 0.9*RandDouble(), 0.2, b + 0.9*RandDouble());
-
-			if ((center - point3(4, 0.2, 0)).Length() > 0.9)
-			{
-				std::shared_ptr<Material> sphereMat;
-
-				if (chooseMat < 0.8)
-				{
-					// lambertian
-					const auto al 	{color3::Random() * color3::Random()};
-					sphereMat = std::make_shared<Lambertian>(std::make_shared<Solid_Color>(al.r(), al.g(), al.b()));
-
-					const auto center2	{center + vec3(0.0, RandDouble(0.0, 0.5), 0.0)};
-					world.Add(std::make_shared<moving_sphere>(center, center2, T0, T1, 0.2, sphereMat));
-				}
-				else if (chooseMat < 0.95)
-				{
-					// metal
-					const auto albedo 	{color3::Random(0.5, 1)};
-					const auto fuzz 	{RandDouble(0, 0.5)};
-					sphereMat = std::make_shared<Metal>(albedo, fuzz);
-					world.Add(std::make_shared<sphere>(center, 0.2, sphereMat));
-				}
-				else
-				{
-					// dielectric
-					sphereMat = std::make_shared<Dielectric>(1.5);
-					world.Add(std::make_shared<sphere>(center, 0.2, sphereMat));
-				}
-			}
-		}
-	}
-
-	auto material1 = std::make_shared<Dielectric>(1.5);
-    world.Add(std::make_shared<sphere>(point3(0, 1, 0), 1.0, material1));
-
-    auto material2 = std::make_shared<Lambertian>(std::make_shared<Solid_Color>(0.4, 0.2, 0.1));
-    world.Add(std::make_shared<sphere>(point3(-4, 1, 0), 1.0, material2));
-
-    auto material3 = std::make_shared<Metal>(color3(0.7, 0.6, 0.5), 0.0);
-    world.Add(std::make_shared<sphere>(point3(4, 1, 0), 1.0, material3));
-
-
-	return world;
-}
-
-
-hittable_list TwoPerlinSpheres()
-{
-	hittable_list world;
-
-	const auto perlinTex 	{std::make_shared<Perlin_Noise>(10)};
-	world.Add(std::make_shared<sphere>(point3(0, -1000, 0), 1000, std::make_shared<Lambertian>(perlinTex)));
-	world.Add(std::make_shared<sphere>(point3(0, 2, 0), 2, std::make_shared<Lambertian>(perlinTex)));
-
-	return world;
-}
-
-
-hittable_list Earth()
-{
-	hittable_list world;
-
-	const auto earthTex 		{std::make_shared<Image_Tex>("earthmap.jpg")};
-	const auto earthSurface 	{std::make_shared<Lambertian>(earthTex)};
-	const auto globe			{std::make_shared<sphere>(point3(0,0,0), 2, earthSurface)};
-	world.Add(globe);
-
-	return world;
-}
-
-
-hittable_list SimpleLight()
-{
-	hittable_list world;
-
-	const auto perlinTex		{std::make_shared<Perlin_Noise>(4)};
-	world.Add(std::make_shared<sphere>(point3(0, -1000, 0), 1000, std::make_shared<Lambertian>(perlinTex)));
-	world.Add(std::make_shared<sphere>(point3(0, 2, 0), 2, std::make_shared<Lambertian>(perlinTex)));
-
-	const auto diffLight		{std::make_shared<Diffuse_Light>(color3(4,4,4))};
-	world.Add(std::make_shared<sphere>(point3(0,7,0), 2, diffLight));
-
-	return world;
-}
+#include <omp.h>
 
 
 color3 RayColor(const ray& r, const color3& background, const hittable& world, const int depth)
@@ -134,7 +25,6 @@ color3 RayColor(const ray& r, const color3& background, const hittable& world, c
 	{
 		return color3(0.0, 0.0, 0.0);
 	}
-
 
 	if(!world.Hit(r, 0.001, infinity, rec))
 	{
@@ -156,29 +46,23 @@ color3 RayColor(const ray& r, const color3& background, const hittable& world, c
 
 int main()
 {
-	constexpr double aspectRatio 		{16.0 / 9.0};
-	constexpr int imageW 				{1280};
-	constexpr int imageH 				{static_cast<int>(imageW / aspectRatio)};
+	double aspectRatio 					{16.0 / 9.0};
+	int imageW 							{1280};
 	const std::string fileName			{"output.ppm"};
-	constexpr int samplesPerPixel 		{200};
+	int samplesPerPixel 				{200};
 	constexpr int maxDepth 				{50};
 	color3 background(0,0,0);			// black background
 
 	spdlog::info("Writing to file {}...", fileName);
 
-	std::ofstream oFile(fileName);
+	point3 lookfrom;
+	point3 lookat;
 
-	oFile << "P3\n" << imageW << ' ' << imageH << ' ' << "\n255\n";
-
-	point3 lookfrom(13,2,3);
-	point3 lookat(0,0, 0);
-	const vec3 vup(0,1,0);
-	auto dist_to_focus 	{10};
 	auto aperture 					{0.0};
-	constexpr double FOV			{20};
-
+	double FOV						{20};
 	int chooseWorld 				{0};
-	spdlog::info("Choose the world to generate:\n\n(1)\tLarge world with many objects\n(2)\tSmall world with 2 textured spheres\n(3)\tEarth textured sphere\n(4)\tLight emitting test");
+
+	spdlog::info("Choose the world to generate:\n\n(1)\tLarge world with many objects\n(2)\tSmall world with 2 textured spheres\n(3)\tEarth textured sphere\n(4)\tLight emitting test\n(5)\tCornell Box scene\n(6)\tCornell Box with SMOKE\n(7)\tCrazy Scene");
 	std::cin >> chooseWorld;
 	hittable_list world;
 
@@ -187,36 +71,90 @@ int main()
 		spdlog::info({}, chooseWorld);
 		case 1:
 			spdlog::info("(1)\tLarge world with many objects");
-			world = GenerateRandomScene();
-			background = color3(0.7, 0.8, 1.0);
+			world = 				GenerateRandomScene();
+			background = 			color3(0.7, 0.8, 1.0);
+			lookfrom =				point3(13, 2, 3);
+			lookat = 				point3(0, 0, 0);
+			FOV =					20.0;
+			aperture = 				0.1;
 			break;
 		case 2:
 			spdlog::info("(2)\tSmall world with 2 textured spheres");
-			world = TwoPerlinSpheres();
-			background = color3(0.7, 0.8, 1.0);
-			aperture = 0.1;
+			world = 				TwoPerlinSpheres();
+			background = 			color3(0.7, 0.8, 1.0);
+			lookfrom =				point3(13, 2, 3);
+			lookat = 				point3(0, 0, 0);
+			FOV =					20.0;
 			break;
 		case 3:
 			spdlog::info("(3)\tEarth textured sphere");
-			background = color3(0.7, 0.8, 1.0);
-			world = Earth();
+			background = 			color3(0.7, 0.8, 1.0);
+			world = 				Earth();
+			lookfrom = 				point3(0, 0, 12);
+			lookat =				point3(0, 0, 0);
+			FOV = 					20.0;
 			break;
 		case 4:
 			spdlog::info("(4)\tLight emitting test");
-			world = SimpleLight();
+			world = 				SimpleLight();
+			samplesPerPixel = 		500;
+			background =			color3(0,1.0,0);
+			lookfrom =				point3(26, 3, 6);
+			lookat = 				point3(0, 2, 0);
+			FOV =					20.0;
 			break;
-
 		default:
-			spdlog::info("\tNo objects - nothing selected");
-			background = color3(0.7, 0.8, 1.0);
-
+		case 5:
+			spdlog::info("(5)\tCornell Box scene");
+			world = 				CornellBox();
+			samplesPerPixel = 		2000;
+			aspectRatio =			1.0;
+			imageW = 				600;
+			//background =			color3(0,0,0);
+			lookfrom =				point3(278, 278, -800);
+			lookat = 				point3(278, 278, 0);
+			FOV = 					40.0;
+			break;
+		case 6:
+			spdlog::info("(6)\tCornell Box with SMOKE");
+			world = 				CornellSmoke();
+			samplesPerPixel = 		2000;
+			aspectRatio =			1.0;
+			imageW = 				600;
+			//background =			color3(0,0,0);
+			lookfrom =				point3(278, 278, -800);
+			lookat = 				point3(278, 278, 0);
+			FOV = 					40.0;
+			break;
+		case 7:
+			spdlog::info("(7)\tCrazy Scene");
+			world = 				CrazyScene();
+			aspectRatio	=			1.0;
+			imageW =				800;
+			samplesPerPixel	=		20000;
+			background =			color3(0, 0, 0);
+			lookfrom = 				point3(478, 278, -600);
+			lookat = 				point3(278, 278, 0);
+			FOV = 					40.0;
+		break;		
 	}	
 
+	int imageH 							{static_cast<int>(imageW / aspectRatio)};
+	const vec3 vup(0,1,0);
+	auto dist_to_focus 				{10};
 	camera cam(lookfrom, lookat, vup, FOV, aspectRatio, aperture, dist_to_focus, T0, T1);
 
-	for (int j = imageH; j > 0; --j)
+	std::ofstream oFile(fileName);
+	oFile << "P3\n" << imageW << ' ' << imageH << ' ' << "\n255\n";
+
+	#pragma omp parallel
 	{
-		spdlog::info("Scanlines remaining: {}", j);
+		spdlog::info("{} OMP threads\n", omp_get_num_threads());
+	}
+
+	for (int j = imageH - 1; j >= 0; --j)
+	{
+		spdlog::info("Scanline completed: {}", j);
 		for (int i = 0; i < imageW; ++i)
 		{
 			color3 pixCol(0.0, 0.0, 0.0);

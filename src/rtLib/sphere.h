@@ -21,10 +21,10 @@ public:
 	{}
 
 	virtual bool Hit(const ray& r, const double t_min, 
-		const double t_max, HitRecord& rec) const override;
+		const double t_max, HitRecord& rec) const override final;
 
 	virtual bool BoundingBox(const double t0, const double t1, 
-		AABB& outputBox) const override;
+		AABB& outputBox) const override final;
 	
 	//virtual ~sphere() = default;
 
@@ -46,10 +46,10 @@ public:
 	{}
 
 	virtual bool Hit(const ray& r, const double t_min, 
-		const double t_max, HitRecord& rec) const override;
+		const double t_max, HitRecord& rec) const override final;
 
 	virtual bool BoundingBox(const double t0, const double t1, 
-		AABB& outputBox) const override;
+		AABB& outputBox) const override final;
 
 	point3 center(const double time) const;
 

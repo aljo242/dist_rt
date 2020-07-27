@@ -75,3 +75,13 @@ color3 Diffuse_Light::Emitted(const double u, const double v, const point3& p) c
 {
 	return emit->Value(u,v,p);
 }
+
+
+
+bool Isotropic::Scatter(const ray& r, const HitRecord& rec,
+		vec3& attenuation, ray& scattered) const
+{
+	scattered = ray(rec.p, RandInUnitSphere(), r.Time());
+	attenuation = albedo->Value(rec.u, rec.v, rec.p);
+	return true;
+}
