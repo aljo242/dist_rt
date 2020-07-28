@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.15)
+cmake_minimum_required(VERSION 3.13)
 
 project(Tutorial VERSION 1.0
 	DESCRIPTION "learning cmake and other CI/CD stuff"
@@ -13,7 +13,7 @@ endif()
 
 # link this 'library' to set c++ standard / compile time options
 add_library(project_options INTERFACE)
-target_compile_features(project_options INTERFACE cxx_std_20)
+target_compile_features(project_options INTERFACE cxx_std_17)
 
 
 if(CMAKE_CXX_COMPILER_ID MATCHES ".*Clang")
