@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.13)
 
-project(Tutorial VERSION 1.0
-	DESCRIPTION "learning cmake and other CI/CD stuff"
+project(Tutorial VERSION 0.1
+	DESCRIPTION "Ray Tracing Renderer"
 	LANGUAGES CXX)
 include(cmake/StandardProjectSettings.cmake)
 include(cmake/PreventInSourceBuilds.cmake)
@@ -44,6 +44,15 @@ enable_doxygen()
 # allow for static analysis options
 include(cmake/StaticAnalyzers.cmake)
 
+include(FindOpenMP)
+
+if(OpenMP_CXX_FOUND) 
+	MESSAGE("Found OpenMP.")
+else()
+	MESSAGE("Could not find OpenMP.  Verify that it is installed.")
+	return()
+endif()
+
 #################################################################################################################################
 # options
 #################################################################################################################################
@@ -58,6 +67,7 @@ if(ENABLE_PCH)
 	target_precompile_headers(
 		project_options
 		INTERFACE
+		<array>
 		<vector>
 		<string>
 		<map>
@@ -72,6 +82,10 @@ set(CONAN_EXTRA_OPTIONS "")
 list(APPEND EXTRA_LIBS 
 	project_options 
 	project_warnings
+	OpenMP::OpenMP_CXX
+	CONAN_PKG::spdlog
+	CONAN_PKG::glm
+	CONAN_PKG::stb
 	)
 
 include(cmake/ConanConfig.cmake)

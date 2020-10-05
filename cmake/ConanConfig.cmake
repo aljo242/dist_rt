@@ -20,7 +20,9 @@ macro(run_conan)
 	conan_cmake_run(
 		REQUIRES
 		${CONAN_EXTRA_REQUIRES}
-		spdlog/1.6.1
+		glm/0.9.9.8
+		spdlog/1.7.0
+		stb/20200203
 		OPTIONS
 		${CONAN_EXTRA_OPTIONS}
 		BASIC_SETUP
