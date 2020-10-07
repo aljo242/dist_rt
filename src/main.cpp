@@ -11,6 +11,7 @@
 #include "Ray.h"
 #include "Plane.h"
 #include "Image.h"
+#include "Sphere.h"
 
 constexpr float epsilon{ 0.000001f };
 constexpr auto aspectRatio{ 16.0f / 9.0f };
@@ -68,6 +69,8 @@ int main()
 	const auto horizontal = Vec3(viewportWidth, 0, 0);
 	const auto vertical = Vec3(0, viewportHeight, 0);
 	const auto leftCorner = origin - horizontal / 2 - vertical / 2 - Vec3(0, 0, 1.0);
+
+	Sphere testSphere(origin, viewportHeight / 2.0);
 	
 	std::vector<uint8_t> image(imageSize);
 	size_t index = 0;
@@ -83,7 +86,10 @@ int main()
 			Ray3 r(origin, leftCorner + u * horizontal + v * vertical - origin);
 
 			pixelColor = RayColor(r);
-
+			if (testSphere.testIntersect(r, 0, infinity))
+			{
+				pixelColor = Color3(0.5f, 0.5f, 0.5f);
+			}
 
 
 			//const auto r = static_cast<float>(u) / (imageWidth - 1);

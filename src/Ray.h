@@ -13,6 +13,7 @@ public:
 	Vec3 Dir() const;
 	Point3 Origin() const;
 	Point3 At(const float t) const;
+	float DirLength() const;
 
 private:
 	Point3 origin;

@@ -12,7 +12,7 @@ Ray3::Ray3(const Vec3& d)
 
 void Ray3::Normalize()
 {
-	const float length = std::sqrt(dir.x * dir.x + dir.y * dir.y + dir.z * dir.z);
+	const float length = DirLength();
 	dir = Vec3(dir.x / length, dir.y / length, dir.z / length);
 }
 
@@ -29,4 +29,9 @@ Point3 Ray3::Origin() const
 Point3 Ray3::At(const float t) const
 {
 	return { origin + t * dir };
+}
+
+float Ray3::DirLength() const
+{
+	return { std::sqrt(dir.x * dir.x + dir.y * dir.y + dir.z * dir.z) };
 }
