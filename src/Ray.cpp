@@ -33,5 +33,5 @@ Point3 Ray3::At(const float t) const
 
 float Ray3::DirLength() const
 {
-	return { std::sqrt(dir.x * dir.x + dir.y * dir.y + dir.z * dir.z) };
+	return  std::sqrt(dir.x * dir.x + dir.y * dir.y + dir.z * dir.z);
 }

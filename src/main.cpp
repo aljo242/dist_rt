@@ -40,10 +40,17 @@ std::optional<Color3> IntersectPlane(const Ray3& ray, const Plane& plane)
 	return std::nullopt;
 }
 
-Color3 RayColor(const Ray3& ray)
+Color3 RayColor(const Ray3& ray, const Sphere& s)
 {
 	Vec3 dir = ray.Dir(); // ray returns normalized vectors
 	const auto t = 0.5f * (dir.y + 1.0f);
+
+	if (s.testIntersect(ray, 0, infinity))
+	{
+		const auto N = ray.At(t) - Vec3(0, 0, -1);
+		return 0.5f * Color3(N.x + 1, N.y + 1, N.z + 1);
+	}
+
 	return {(1.0f - t) * Color3(1.0f, 1.0f, 1.0f) + t * Color3(0.5f, 0.7f, 1.0f)};
 }
 
@@ -70,7 +77,7 @@ int main()
 	const auto vertical = Vec3(0, viewportHeight, 0);
 	const auto leftCorner = origin - horizontal / 2 - vertical / 2 - Vec3(0, 0, 1.0);
 
-	Sphere testSphere(origin, viewportHeight / 2.0);
+	Sphere testSphere(Point3(0.0, 0.0, -1.0), 0.5f);
 	
 	std::vector<uint8_t> image(imageSize);
 	size_t index = 0;
@@ -85,16 +92,8 @@ int main()
 			Color3 pixelColor;
 			Ray3 r(origin, leftCorner + u * horizontal + v * vertical - origin);
 
-			pixelColor = RayColor(r);
-			if (testSphere.testIntersect(r, 0, infinity))
-			{
-				pixelColor = Color3(0.5f, 0.5f, 0.5f);
-			}
+			pixelColor = RayColor(r, testSphere);
 
-
-			//const auto r = static_cast<float>(u) / (imageWidth - 1);
-			//const auto g = static_cast<float>(v) / (imageHeight - 1);
-			//const auto b = 0.25f;
 
 			const auto ir = static_cast<uint8_t>(255.99f * pixelColor.r);
 			const auto ig = static_cast<uint8_t>(255.99f * pixelColor.g);
