@@ -4,84 +4,23 @@
 #include <array>
 #include <vector>
 #include <spdlog/spdlog.h>
-#include "glm/glm.hpp"
-
-#define STB_IMAGE_WRITE_IMPLEMENTATION
-#include "stb_image_write.h"
-
+#include "defs.h"
 
 #include <omp.h>
 
-// typedefs
-using Vec3 = glm::vec3;
-using Point3 = glm::vec3;
-using Color3 = glm::vec3;
+#include "Ray.h"
+#include "Plane.h"
+#include "Image.h"
 
 constexpr float epsilon{ 0.000001f };
-constexpr int imageWidth{ 512 };
-constexpr int imageHeight{ 512 };
+constexpr auto aspectRatio{ 16.0f / 9.0f };
+constexpr int imageWidth{ 1280 };
+constexpr int imageHeight{ static_cast<int>(imageWidth / aspectRatio) };
 constexpr int numChannels{ 3 };
 constexpr int imageSize{ imageHeight * imageWidth * numChannels};
 
-
-class Ray3
-{
-public:
-	Ray3(const Vec3& o, const Point3& d)
-		: origin(o), dir(d)
-	{
-		Normalize();
-	}
-
-	Ray3(const Vec3& d)
-		: origin(0, 0, 0), dir(d)
-	{}
-
-	void Normalize() 
-	{
-		dir =  Vec3(dir.x / dir.length(), dir.y / dir.length(), dir.z / dir.length());
-	}
-
-	Vec3 Dir() const
-	{
-		return dir;
-	}
-
-	Point3 Origin() const
-	{
-		return origin;
-	}
-
-private:
-	Point3 origin;
-	Vec3 dir;
-};
-
-
-class Plane
-{
-public:
-	// two vectors and a point 
-	Plane(const Point3& origin, const Vec3& A, const Vec3& B)
-	{
-		const auto cross	{glm::cross(A, B)};
-		norm = Ray3(origin, glm::normalize(cross));
-	}
-
-	Vec3 NormVec() const
-	{ 
-		return norm.Dir(); 
-	}
-
-	Point3 NormPoint() const
-	{ 
-		return norm.Origin(); 
-	}
-	
-	// hold a point and norm
-private:
-	Ray3 norm{ {0,0,0}, {0,0,0} };
-};
+constexpr auto viewportHeight{ 2.0f };
+constexpr auto viewportWidth{ viewportHeight * aspectRatio };
 
 
 std::optional<Color3> IntersectPlane(const Ray3& ray, const Plane& plane)
@@ -100,6 +39,12 @@ std::optional<Color3> IntersectPlane(const Ray3& ray, const Plane& plane)
 	return std::nullopt;
 }
 
+Color3 RayColor(const Ray3& ray)
+{
+	Vec3 dir = ray.Dir(); // ray returns normalized vectors
+	const auto t = 0.5f * (dir.y + 1.0f);
+	return {(1.0f - t) * Color3(1.0f, 1.0f, 1.0f) + t * Color3(0.5f, 0.7f, 1.0f)};
+}
 
 int main()
 {
@@ -107,7 +52,6 @@ int main()
 
 	Ray3 testRay{ {0,0,0}, {2, 2, 2} };
 	spdlog::critical("test ray norm: {} {} {}", testRay.Dir().x, testRay.Dir().y, testRay.Dir().z);
-	
 
 	Plane testPlane(Point3(5, 5, 5), Vec3(5, 0, 1), Vec3(0, 1, 0) );
 	
@@ -119,30 +63,50 @@ int main()
 	}
 
 	const char* filename = "test_output.png";
+
+	const auto origin = Point3(0, 0, 0);
+	const auto horizontal = Vec3(viewportWidth, 0, 0);
+	const auto vertical = Vec3(0, viewportHeight, 0);
+	const auto leftCorner = origin - horizontal / 2 - vertical / 2 - Vec3(0, 0, 1.0);
 	
 	std::vector<uint8_t> image(imageSize);
 	size_t index = 0;
-	for (size_t i = 0; i < imageHeight * imageWidth; ++i)
+
+	for (int j = 0; j < imageHeight; ++j)
 	{
-		size_t u = i % imageWidth;
-		size_t v = i / imageHeight;
-		//spdlog::critical("({}, {})", u, v);
-		const auto r = static_cast<float>(u) / (imageWidth - 1);
-		const auto g = static_cast<float>(v) / (imageHeight - 1);
-		const auto b = 0.25f;
+		for (int i = 0; i < imageWidth; ++i)
+		{
+			const auto u = static_cast<float>(i) / (imageWidth - 1);
+			const auto v = static_cast<float>(j) / (imageHeight - 1);
 
-		const auto ir = static_cast<uint8_t>(255.99f * r);
-		const auto ig = static_cast<uint8_t>(255.99f * g);
-		const auto ib = static_cast<uint8_t>(255.99f * b);
+			Color3 pixelColor;
+			Ray3 r(origin, leftCorner + u * horizontal + v * vertical - origin);
 
-		image[index++] = ir;
-		image[index++] = ig;
-		image[index++] = ib;
+			pixelColor = RayColor(r);
+
+
+
+			//const auto r = static_cast<float>(u) / (imageWidth - 1);
+			//const auto g = static_cast<float>(v) / (imageHeight - 1);
+			//const auto b = 0.25f;
+
+			const auto ir = static_cast<uint8_t>(255.99f * pixelColor.r);
+			const auto ig = static_cast<uint8_t>(255.99f * pixelColor.g);
+			const auto ib = static_cast<uint8_t>(255.99f * pixelColor.b);
+
+			/*
+			spdlog::critical("(i, j) = ({}, {})", i, j);
+			spdlog::critical("(u, v) = ({}, {})", u, v);
+			spdlog::critical("Color = ({}, {}, {})", ir, ig, ib);
+			*/
+
+			image[index++] = ir;
+			image[index++] = ig;
+			image[index++] = ib;
+		}
 	}
 	
-
-	spdlog::critical("Writing to file: {}", filename);
-	stbi_write_png(filename, imageWidth, imageHeight, numChannels, image.data(), imageWidth*numChannels);
+	writePNG(filename, imageWidth, imageHeight, numChannels, image);
 
 	return 0;
 }
