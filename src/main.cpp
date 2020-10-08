@@ -11,18 +11,51 @@
 #include "Ray.h"
 #include "Plane.h"
 #include "Image.h"
+#include "Scene_Object.h"
 #include "Sphere.h"
+#include "Camera.h"
 
-constexpr float epsilon{ 0.000001f };
-constexpr auto aspectRatio{ 16.0f / 9.0f };
 constexpr int imageWidth{ 1280 };
 constexpr int imageHeight{ static_cast<int>(imageWidth / aspectRatio) };
 constexpr int numChannels{ 3 };
 constexpr int imageSize{ imageHeight * imageWidth * numChannels};
 
-constexpr auto viewportHeight{ 2.0f };
-constexpr auto viewportWidth{ viewportHeight * aspectRatio };
+constexpr size_t defaultNumObjects = 1000;
 
+
+class ObjectList
+{
+public:
+	ObjectList()
+		: objects(defaultNumObjects)
+	{}
+
+	ObjectList(size_t numObjects)
+		: objects(numObjects)
+	{}
+
+	void AddElement(Scene_Object* so) 
+	{
+		if (push)
+		{
+			objects.push_back(so);
+			return;
+		}
+	
+		objects[elementsPushed] = so;
+		elementsPushed++;
+
+		if ((elementsPushed >= defaultNumObjects) && push == false)
+		{
+			push = true;
+		}
+	}
+
+private:
+	std::vector<Scene_Object*> objects;
+	size_t elementsPushed = 0;
+	bool push = false;
+};
 
 std::optional<Color3> IntersectPlane(const Ray3& ray, const Plane& plane)
 {
@@ -45,7 +78,7 @@ Color3 RayColor(const Ray3& ray, const Sphere& s)
 	Vec3 dir = ray.Dir(); // ray returns normalized vectors
 	const auto t = 0.5f * (dir.y + 1.0f);
 
-	if (s.testIntersect(ray, 0, infinity))
+	if (s.Intersect(ray, 0, infinity))
 	{
 		const auto N = ray.At(t) - Vec3(0, 0, -1);
 		return 0.5f * Color3(N.x + 1, N.y + 1, N.z + 1);
@@ -72,13 +105,15 @@ int main()
 
 	const char* filename = "test_output.png";
 
-	const auto origin = Point3(0, 0, 0);
-	const auto horizontal = Vec3(viewportWidth, 0, 0);
-	const auto vertical = Vec3(0, viewportHeight, 0);
-	const auto leftCorner = origin - horizontal / 2 - vertical / 2 - Vec3(0, 0, 1.0);
+	ViewPort vp;
+	vp.origin = Point3(0, 0, 0);
+	vp.horizontal = Vec3(viewportWidth, 0, 0);
+	vp.vertical = Vec3(0, viewportHeight, 0);
+	vp.lowerLeftCorner = vp.origin - vp.horizontal / 2 - vp.vertical / 2 - Vec3(0, 0, 1.0);
+	Camera cam(vp);
 
 	Sphere testSphere(Point3(0.0, 0.0, -1.0), 0.5f);
-	
+
 	std::vector<uint8_t> image(imageSize);
 	size_t index = 0;
 
@@ -90,7 +125,7 @@ int main()
 			const auto v = static_cast<float>(j) / (imageHeight - 1);
 
 			Color3 pixelColor;
-			Ray3 r(origin, leftCorner + u * horizontal + v * vertical - origin);
+			Ray3 r = cam.getRay(u, v);
 
 			pixelColor = RayColor(r, testSphere);
 

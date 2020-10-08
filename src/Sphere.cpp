@@ -1,10 +1,12 @@
 #include "Sphere.h"
+#include "Ray.h"
+
 
 Sphere::Sphere(const Point3& cen, const float r)
 	: center(cen), radius(r)
 {}
 
-bool Sphere::testIntersect(const Ray3& r, const float tmin, const float tmax) const
+bool Sphere::Intersect(const Ray3& r, const float tmin, const float tmax) const
 {
 	const Vec3 OriginToCenter = r.Origin() - center;
 	const auto a = r.DirLength() * r.DirLength();
@@ -12,7 +14,7 @@ bool Sphere::testIntersect(const Ray3& r, const float tmin, const float tmax) co
 	const auto c = Length(OriginToCenter) * Length(OriginToCenter) - radius * radius;
 	const auto discriminant = half_b * half_b - a * c;
 
-	Vec3 outwardNormal;
+	//Vec3 outwardNormal;
 
 	if (discriminant > 0)
 	{
