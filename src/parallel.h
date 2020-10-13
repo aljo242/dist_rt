@@ -58,41 +58,84 @@ void Render(const ConfigInfo& config)
 
 	Sphere testSphere(Point3(0.0, 0.0, -1.0), 0.5f);
 
-	std::vector<uint8_t> image(bufferSize);
-	size_t index = 0;
+	
+	std::vector<uint8_t> image;
 
-	for (int j = 0; j < imagebufferHeight; ++j)
+	if (worldRank == MASTER)
 	{
-		for (int i = 0; i < imagebufferWidth; ++i)
+		image.reserve(bufferSize);
+	}
+	else
+	{
+		image.reserve(tileInfo.tileSize * config.imageNumChannels);
+	}
+
+	const auto gridIndices = grid.indices[worldRank];
+	const auto startIndex_X = gridIndices.first;
+	const auto stopIndex_X = startIndex_X + tileInfo.tileWidth;
+	const auto startIndex_Y = gridIndices.second;
+	const auto stopIndex_Y = startIndex_Y + tileInfo.tileHeight;
+	spdlog::critical("X: ({}, {}), Y: ({}, {})", startIndex_X, stopIndex_X, startIndex_Y, stopIndex_Y);
+
+	size_t index = 0;
+	for (int j = startIndex_Y; j < stopIndex_Y; ++j)
+	{
+		for (int i = startIndex_X; i < stopIndex_X; ++i)
 		{
-			const auto u = static_cast<float>(i) / (imagebufferWidth - 1);
-			const auto v = static_cast<float>(j) / (imagebufferHeight - 1);
+			Color3 pixelColor = Color3(0, 0, 0);
 
-			Color3 pixelColor;
-			Ray3 r = cam.getRay(u, v);
+			for (int s = 0; s < config.samplesPerPixel; ++s)
+			{
+				const auto u = (static_cast<float>(i) + randFloat()) / (imagebufferWidth - 1);
+				const auto v = (static_cast<float>(j) + randFloat()) / (imagebufferHeight - 1);
 
-			pixelColor = RayColor(r, testSphere);
+				Ray3 r = cam.getRay(u, v);
+				pixelColor += RayColor(r, testSphere);
+			}
 
+			// scale by num samples
+			const auto scale = 1.0f / config.samplesPerPixel;
+			const auto r = pixelColor.r * scale;
+			const auto g = pixelColor.g * scale;
+			const auto b = pixelColor.b * scale;
 
-			const auto ir = static_cast<uint8_t>(255.99f * pixelColor.r);
-			const auto ig = static_cast<uint8_t>(255.99f * pixelColor.g);
-			const auto ib = static_cast<uint8_t>(255.99f * pixelColor.b);
+			const auto ir = static_cast<uint8_t>(255.99f * r);
+			const auto ig = static_cast<uint8_t>(255.99f * g);
+			const auto ib = static_cast<uint8_t>(255.99f * b);
 
-			/*
-			spdlog::critical("(i, j) = ({}, {})", i, j);
-			spdlog::critical("(u, v) = ({}, {})", u, v);
-			spdlog::critical("Color = ({}, {}, {})", ir, ig, ib);
-			*/
-
-			image[index++] = ir;
-			image[index++] = ig;
-			image[index++] = ib;
+			//spdlog::critical("{}", index);
+			if (worldRank == MASTER)
+			{
+				auto index = i * config.imageNumChannels + j * imagebufferWidth * config.imageNumChannels;
+				image[index] = ir;
+				image[index + 1] = ig;
+				image[index + 2] = ib;
+			}
+			else
+			{
+				image[index++] = ir;
+				image[index++] = ig;
+				image[index++] = ib;
+			}
+		}
+	}
+	
+	if (worldRank != MASTER)
+	{
+		//MPI_Send();
+	}
+	else
+	{
+		for (int i = 1; i < worldSize; ++i)
+		{
+			//MPI_Recv();
+			spdlog::critical("MASTER node recieving from node {}", i);
 		}
 	}
 
 	MPI_Finalize();
 
-	writePNG(config.outputFilename, imagebufferHeight, imagebufferHeight, config.imageNumChannels, image);
+	writePNG(config.outputFilename, imagebufferWidth, imagebufferHeight, config.imageNumChannels, image);
 }
 
 
