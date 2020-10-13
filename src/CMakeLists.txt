@@ -1,6 +1,6 @@
 include(FindMPI)
 
-set(MPI_INCLUDES "")
+set(RUNTIME_INCLUDES "")
 
 if (MPI_CXX_FOUND)
 	MESSAGE("Found MPI, compiling with support")
@@ -13,12 +13,12 @@ if (MPI_CXX_FOUND)
 		CONAN_PKG::glm
 		CONAN_PKG::stb
 	)
-	set(MPI_INCLUDES "parallel.h")
+	set(RUNTIME_INCLUDES "parallel.h")
 	add_compile_definitions(WITH_MPI)
 
 else()
 	MESSAGE("Count not find MPI, compiling without support")
-	set(MPI_INCLUDES "")
+	set(RUNTIME_INCLUDES "serial.h")
 
 endif()
 
@@ -27,7 +27,7 @@ endif()
 
 add_executable(main 
 	main.cpp
-	 "Ray.h" "defs.h" "Ray.cpp" "Plane.h" "Plane.cpp" "Image.h" "Image.cpp" "Sphere.h" "Sphere.cpp" "Scene_Object.h" "utils.h" "Camera.h" "Camera.cpp" ${MPI_INCLUDES})
+	 "Ray.h" "defs.h" "Ray.cpp" "Plane.h" "Plane.cpp" "Image.h" "Image.cpp" "Sphere.h" "Sphere.cpp" "Scene_Object.h" "utils.h" "Camera.h" "Camera.cpp" ${RUNTIME_INCLUDES})
 
 target_link_libraries(main PUBLIC
 	${EXTRA_LIBS}

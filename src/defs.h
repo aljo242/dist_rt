@@ -46,13 +46,25 @@ struct ViewPort
 };
 
 
-struct RunTimeInfo
+struct ConfigInfo
 {
 	int imagebufferSize;
+	int imagebufferWidth;
+	int imagebufferHeight;
+	int imageNumChannels = 3;
 	int samplesPerPixel;
 	int numTiles;
+	const char* inputFilename;
+	const char* outputFilename;
 };
 
+
+constexpr int imageWidth{ 1280 };
+constexpr int imageHeight{ static_cast<int>(imageWidth / aspectRatio) };
+constexpr int numChannels{ 3 };
+constexpr int imageSize{ imageHeight * imageWidth };
+
+constexpr size_t defaultNumObjects = 1000;
 
 
 // Distributed variables
