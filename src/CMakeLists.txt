@@ -14,6 +14,7 @@ if (MPI_CXX_FOUND)
 		CONAN_PKG::stb
 	)
 	set(MPI_INCLUDES "parallel.h")
+	add_compile_definitions(WITH_MPI)
 
 else()
 	MESSAGE("Count not find MPI, compiling without support")

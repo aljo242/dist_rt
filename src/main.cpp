@@ -8,6 +8,10 @@
 
 #include <omp.h>
 
+#ifdef WITH_MPI
+#include "parallel.h"
+#endif
+
 #include "Ray.h"
 #include "Plane.h"
 #include "Image.h"
