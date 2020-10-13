@@ -46,4 +46,17 @@ struct ViewPort
 };
 
 
+struct RunTimeInfo
+{
+	int imagebufferSize;
+	int samplesPerPixel;
+	int numTiles;
+};
+
+
+
+// Distributed variables
+constexpr int MASTER = 0;
+
+
 #endif

@@ -18,7 +18,7 @@
 constexpr int imageWidth{ 1280 };
 constexpr int imageHeight{ static_cast<int>(imageWidth / aspectRatio) };
 constexpr int numChannels{ 3 };
-constexpr int imageSize{ imageHeight * imageWidth * numChannels};
+constexpr int imageSize{ imageHeight * imageWidth * numChannels };
 
 constexpr size_t defaultNumObjects = 1000;
 
@@ -86,6 +86,9 @@ Color3 RayColor(const Ray3& ray, const Sphere& s)
 
 	return {(1.0f - t) * Color3(1.0f, 1.0f, 1.0f) + t * Color3(0.5f, 0.7f, 1.0f)};
 }
+
+
+
 
 int main()
 {
