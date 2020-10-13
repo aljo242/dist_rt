@@ -10,6 +10,7 @@
 #include "Scene_Object.h"
 #include "Sphere.h"
 #include "Camera.h"
+#include "Tiling.h"
 
 #include <mpi.h>
 
@@ -29,47 +30,8 @@ Color3 RayColor(const Ray3& ray, const Sphere& s)
 }
 
 
-struct TileInfo
+void Render(const ConfigInfo& config)
 {
-	int numTiles;
-	int tileWidth;
-	int tileHeight;
-	int tileSize;
-};
-
-void fillTileInfo(const int worldSize, TileInfo& ti, int& imagebufferSize)
-{
-
-	const int numTiles = worldSize;
-	const int remainder = imagebufferSize % numTiles;
-	if (remainder != 0)
-	{
-		imagebufferSize = imagebufferSize - remainder;
-	}
-	const int imagebufferWidth = imagebufferSize * aspectRatio;
-	const int imagebufferHeight = imagebufferSize / aspectRatio;
-	const int tileSize = imagebufferSize / numTiles;
-	const int tileWidth = tileSize * aspectRatio;
-	const int tileHeight = tileSize / aspectRatio;
-
-	if (tileSize != tileWidth * tileHeight)
-	{
-		spdlog::error("Failed to tile the image!");
-		return;
-	}
-
-	ti.numTiles = numTiles;
-	ti.tileWidth = tileWidth;
-	ti.tileHeight = tileHeight;
-	ti.tileSize = tileSize;
-}
-
-void Render(const ConfigInfo& info)
-{
-	int bufferSize = info.imagebufferSize * info.imageNumChannels;
-	int imagebufferWidth = info.imagebufferWidth;
-	int imagebufferHeight = info.imagebufferHeight;
-
 	MPI_Init(NULL, NULL);
 	int worldRank;
 	int worldSize;
@@ -77,24 +39,17 @@ void Render(const ConfigInfo& info)
 	MPI_Comm_size(MPI_COMM_WORLD, &worldSize);
 	MPI_Comm_rank(MPI_COMM_WORLD, &worldRank);
 
-	int imagebufferSize = info.imagebufferSize;
-
-	if (worldSize % 2 != 0)
-	{
-		if (worldRank == MASTER)
-		{
-			spdlog::error("ONLY SUPPORTING EVEN # NODES\nexiting...");
-			MPI_Finalize();
-			return;
-		}
-	}
+	int bufferSize = config.imagebufferSize * config.imageNumChannels;
+	int imagebufferWidth = config.imagebufferWidth;
+	int imagebufferHeight = config.imagebufferHeight;
+	int imagebufferSize = config.imagebufferSize;
 
 	TileInfo tileInfo;
-	fillTileInfo(worldSize, tileInfo, imagebufferSize);
+	fillTileInfo(worldSize, config, tileInfo);
 	spdlog::critical("Tile size: {}\nTile width: {}\nTile height {}",
 		tileInfo.tileSize, tileInfo.tileWidth, tileInfo.tileHeight);
 
-	bufferSize = imagebufferSize * info.imageNumChannels;
+	bufferSize = imagebufferSize * config.imageNumChannels;
 
 	ViewPort vp;
 	vp.origin = Point3(0, 0, 0);
@@ -139,7 +94,7 @@ void Render(const ConfigInfo& info)
 
 	MPI_Finalize();
 
-	writePNG(info.outputFilename, imagebufferHeight, imagebufferHeight, info.imageNumChannels, image);
+	writePNG(config.outputFilename, imagebufferHeight, imagebufferHeight, config.imageNumChannels, image);
 }
 
 

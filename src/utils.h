@@ -13,5 +13,11 @@ inline float randFloat(const float min, const float max)
 	return min + (max - min) * randFloat();
 }
 
+inline bool isPerfectSquare(const int x)
+{
+	const auto sr = static_cast<double>(std::sqrt(x));
+	return ((sr - std::floor(sr)) == 0);
+}
+
 
 #endif // UTILS_H

@@ -8,6 +8,7 @@
 #include "Scene_Object.h"
 #include "Sphere.h"
 #include "Camera.h"
+#include "Tiling.h"
 
 
 Color3 RayColor(const Ray3& ray, const Sphere& s)
@@ -24,11 +25,23 @@ Color3 RayColor(const Ray3& ray, const Sphere& s)
 	return { (1.0f - t) * Color3(1.0f, 1.0f, 1.0f) + t * Color3(0.5f, 0.7f, 1.0f) };
 }
 
-void Render(const ConfigInfo& info)
+
+void Render(const ConfigInfo& config)
 {
-	const int bufferSize = info.imagebufferSize * info.imageNumChannels;
-	const int imagebufferWidth = info.imagebufferWidth;
-	const int imagebufferHeight = info.imagebufferHeight;
+	int bufferSize = config.imagebufferSize * config.imageNumChannels;
+	const int imagebufferWidth = config.imagebufferWidth;
+	const int imagebufferHeight = config.imagebufferHeight;
+	int imagebufferSize = config.imagebufferSize;
+
+	int worldSize = 4;
+	int worldRank = 0;
+
+	TileInfo tileInfo;
+	fillTileInfo(worldSize, config, tileInfo);
+	spdlog::critical("Tile size: {}\nTile width: {}\nTile height {}",
+		tileInfo.tileSize, tileInfo.tileWidth, tileInfo.tileHeight);
+
+	bufferSize = imagebufferSize * config.imageNumChannels;
 
 	ViewPort vp;
 	vp.origin = Point3(0, 0, 0);
@@ -71,7 +84,7 @@ void Render(const ConfigInfo& info)
 		}
 	}
 
-	writePNG(info.outputFilename, imagebufferWidth, imagebufferHeight, info.imageNumChannels, image);
+	writePNG(config.outputFilename, imagebufferWidth, imagebufferHeight, config.imageNumChannels, image);
 }
 
 
