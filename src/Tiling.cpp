@@ -37,5 +37,6 @@ void fillTileInfo(const int numTiles, const ConfigInfo& config, TileInfo& ti)
 	ti.tileWidth = tileWidth;
 	ti.tileHeight = tileHeight;
 	ti.tileSize = tileSize;
-
+	spdlog::critical("\n---------- TILE INFO ----------\nTile size: {}\nTile width: {}\nTile height {}",
+		ti.tileSize, ti.tileWidth, ti.tileHeight);
 }

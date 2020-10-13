@@ -38,8 +38,6 @@ void Render(const ConfigInfo& config)
 
 	TileInfo tileInfo;
 	fillTileInfo(worldSize, config, tileInfo);
-	spdlog::critical("Tile size: {}\nTile width: {}\nTile height {}",
-		tileInfo.tileSize, tileInfo.tileWidth, tileInfo.tileHeight);
 
 	bufferSize = imagebufferSize * config.imageNumChannels;
 
