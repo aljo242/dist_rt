@@ -70,17 +70,15 @@ void Render(const ConfigInfo& config)
 
 	const size_t tilebufferSize = tileInfo.tileSize * config.imageNumChannels;
 	std::vector<uint8_t> image;
-	std::vector<uint8_t> recvBuff(0);
+	std::vector<uint8_t> recvBuff(tilebufferSize);
 
 	if (worldRank == MASTER)
 	{
 		image.reserve(bufferSize);
-		recvBuff.reserve(tilebufferSize);
 	}
 	else
 	{
 		image.reserve(tilebufferSize);
-		recvBuff.reserve(tilebufferSize);
 	}
 
 	const auto gridIndices = grid.indices[u_worldRank];
@@ -146,7 +144,7 @@ void Render(const ConfigInfo& config)
 			//MPI_Recv();
 			MPI_Recv(recvBuff.data(), static_cast<int>(recvBuff.size()), MPI_UNSIGNED_CHAR,
 				i, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE   );
-			spdlog::critical("RecieveBuffer Size: {}", recvBuff.size())
+			spdlog::critical("RecieveBuffer Size: {}", recvBuff.size());
 			copyToImage(recvBuff, tileInfo, grid, i, image);
 			spdlog::critical("MASTER node recieving from node {}", i);
 		}
