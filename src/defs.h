@@ -59,7 +59,7 @@ struct ConfigInfo
 };
 
 
-constexpr uint32_t imageWidth{ 2560 };
+constexpr uint32_t imageWidth{ 32 };
 constexpr uint32_t imageHeight{ static_cast<int>(imageWidth / aspectRatio) };
 constexpr uint32_t numChannels{ 3 };
 constexpr uint32_t imageSize{ imageHeight * imageWidth };
