@@ -168,7 +168,7 @@ void copyToImage(const std::vector<uint8_t>& recvBuffer,
 	const int tileIndex,
 	std::vector<uint8_t>& image)
 {
-	const auto gridIndices = grid.indices[static_cast<size_t>(tileIndex)];
+	const auto gridIndices = tileGrid.indices[static_cast<size_t>(tileIndex)];
 	const auto startIndex_X = gridIndices.first;
 	const auto stopIndex_X = startIndex_X + tileInfo.tileWidth;
 	const auto startIndex_Y = gridIndices.second;
@@ -183,7 +183,7 @@ void copyToImage(const std::vector<uint8_t>& recvBuffer,
 	spdlog::critical("X: ({}, {}), Y: ({}, {})", startIndex_X, stopIndex_X, startIndex_Y, stopIndex_Y);
 	for (size_t i = 0; i < recvBuffer.size(); ++i)
 	{
-
+		image[i] = 0;
 	}
 
 }
