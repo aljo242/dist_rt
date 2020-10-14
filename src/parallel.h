@@ -171,11 +171,13 @@ void copyToImage(const std::vector<uint8_t>& recvBuffer,
 	const uint32_t numChannels,
 	std::vector<uint8_t>& image)
 {
+
+	// do everything in terms of [ ONE ENTRY IS 3 PIXELS ]
 	const auto gridIndices = tileGrid.indices[static_cast<size_t>(tileIndex)];
-	const auto startIndex_X = gridIndices.first;
-	const auto stopIndex_X = startIndex_X + tileInfo.tileWidth;
-	const auto startIndex_Y = gridIndices.second;
-	const auto stopIndex_Y = startIndex_Y + tileInfo.tileHeight;
+	const auto startIndex_X = gridIndices.first * numChannels;
+	const auto stopIndex_X = startIndex_X + tileInfo.tileWidth * numChannels;
+	const auto startIndex_Y = gridIndices.second * numChannels;
+	const auto stopIndex_Y = startIndex_Y + tileInfo.tileHeight * numChannels;
 
 	if ((stopIndex_X - startIndex_X) * (stopIndex_Y - startIndex_Y) * numChannels != recvBuffer.size())
 	{
@@ -184,11 +186,13 @@ void copyToImage(const std::vector<uint8_t>& recvBuffer,
 	}
 
 	spdlog::critical("X: ({}, {}), Y: ({}, {})", startIndex_X, stopIndex_X, startIndex_Y, stopIndex_Y);
+
 	for (size_t i = 0; i < recvBuffer.size(); i+= numChannels)
 	{
-		size_t index = (i + startIndex_X);
-		size_t yOffset = (i / tileInfo.tileWidth);
-		index = index + (yOffset * tileInfo.tileHeight);
+		size_t xIndex = i + startIndex_X;
+		size_t yIndex = i / (tileInfo.tileWidth * numChannels);
+		size_t index = xIndex + yIndex * (tileInfo.tileWidth * numChannels * tileInfo.tileDims.first);
+
 		spdlog::critical("i: {}, index: {}", i, index);
 
 		image[index] = recvBuffer[i];
