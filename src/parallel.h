@@ -46,8 +46,9 @@ void Render(const ConfigInfo& config)
 
 	TileInfo tileInfo;
 	fillTileInfo(worldSize, config, tileInfo);
+	TileGrid grid(tileInfo);
 
-	bufferSize = imagebufferSize * config.imageNumChannels;
+	bufferSize = static_cast<size_t>(imagebufferSize * config.imageNumChannels);
 
 	ViewPort vp;
 	vp.origin = Point3(0, 0, 0);
@@ -105,7 +106,7 @@ void Render(const ConfigInfo& config)
 			//spdlog::critical("{}", index);
 			if (worldRank == MASTER)
 			{
-				const auto index = static_cast<size_t>(i * config.imageNumChannels + j * imagebufferWidth * config.imageNumChannels);
+				index = static_cast<size_t>(i * config.imageNumChannels + j * imagebufferWidth * config.imageNumChannels);
 				image[index] = ir;
 				image[index + 1] = ig;
 				image[index + 2] = ib;
