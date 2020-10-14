@@ -80,6 +80,7 @@ void Render(const ConfigInfo& config)
 	else
 	{
 		image.reserve(tilebufferSize);
+		recvBuff.reserve(tilebufferSize);
 	}
 
 	const auto gridIndices = grid.indices[u_worldRank];
