@@ -136,6 +136,7 @@ void Render(const ConfigInfo& config)
 		}
 	}
 
+	MPI_Barrier(MPI_COMM_WORLD);
 	MPI_Finalize();
 
 	writePNG(config.outputFilename, imagebufferWidth, imagebufferHeight, config.imageNumChannels, image);
