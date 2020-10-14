@@ -33,6 +33,7 @@ void copyToImage(const std::vector<uint8_t>& recvBuffer,
 	const TileInfo& tileInfo, 
 	const TileGrid& tileGrid, 
 	const int tileIndex, 
+	const uint32_t numChannels,
 	std::vector<uint8_t>& image);
 
 
@@ -69,16 +70,17 @@ void Render(const ConfigInfo& config)
 	Sphere testSphere(Point3(0.0, 0.0, -1.0), 0.5f);
 
 	const size_t tilebufferSize = tileInfo.tileSize * config.imageNumChannels;
-	std::vector<uint8_t> image;
-	std::vector<uint8_t> recvBuff(tilebufferSize);
+	std::vector<uint8_t> image(0);
+	std::vector<uint8_t> recvBuff(0);
 
 	if (worldRank == MASTER)
 	{
-		image.reserve(bufferSize);
+		image.resize(bufferSize);
+		recvBuff.resize(tilebufferSize);
 	}
 	else
 	{
-		image.reserve(tilebufferSize);
+		image.resize(tilebufferSize);
 	}
 
 	const auto gridIndices = grid.indices[u_worldRank];
@@ -145,7 +147,7 @@ void Render(const ConfigInfo& config)
 			MPI_Recv(recvBuff.data(), static_cast<int>(recvBuff.size()), MPI_UNSIGNED_CHAR,
 				i, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE   );
 			spdlog::critical("RecieveBuffer Size: {}", recvBuff.size());
-			copyToImage(recvBuff, tileInfo, grid, i, image);
+			copyToImage(recvBuff, tileInfo, grid, i, config.imageNumChannels, image);
 			spdlog::critical("MASTER node recieving from node {}", i);
 		}
 	}
@@ -166,6 +168,7 @@ void copyToImage(const std::vector<uint8_t>& recvBuffer,
 	const TileInfo& tileInfo,
 	const TileGrid& tileGrid,
 	const int tileIndex,
+	const uint32_t numChannels,
 	std::vector<uint8_t>& image)
 {
 	const auto gridIndices = tileGrid.indices[static_cast<size_t>(tileIndex)];
@@ -174,7 +177,7 @@ void copyToImage(const std::vector<uint8_t>& recvBuffer,
 	const auto startIndex_Y = gridIndices.second;
 	const auto stopIndex_Y = startIndex_Y + tileInfo.tileHeight;
 
-	if ((stopIndex_X - startIndex_X) * (stopIndex_Y - startIndex_Y) != recvBuffer.size())
+	if ((stopIndex_X - startIndex_X) * (stopIndex_Y - startIndex_Y) * numChannels != recvBuffer.size())
 	{
 		spdlog::error("buffer tile sizes to not match!\n------------ Info ------------\nIndices: ({}, {}), Y: ({}, {})\nRecvbuffer size: {}", 
 			startIndex_X, stopIndex_X, startIndex_Y, stopIndex_Y, recvBuffer.size());
