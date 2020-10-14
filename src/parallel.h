@@ -63,6 +63,7 @@ void Render(const ConfigInfo& config)
 	Sphere testSphere(Point3(0.0, 0.0, -1.0), 0.5f);
 
 	std::vector<uint8_t> image;
+	const size_t tilebufferSize = tileInfo.tileSize * config.imageNumChannels;
 
 	if (worldRank == MASTER)
 	{
@@ -70,7 +71,7 @@ void Render(const ConfigInfo& config)
 	}
 	else
 	{
-		image.reserve(tileInfo.tileSize * config.imageNumChannels);
+		image.reserve(tilebufferSize);
 	}
 
 	const auto gridIndices = grid.indices[u_worldRank];
@@ -126,12 +127,17 @@ void Render(const ConfigInfo& config)
 	if (worldRank != MASTER)
 	{
 		//MPI_Send();
+		MPI_Send(image.data(), static_cast<int>(image.size()), MPI_UNSIGNED_CHAR, 
+			MASTER, 0, MPI_COMM_WORLD);
 	}
 	else
 	{
 		for (int i = 1; i < worldSize; ++i)
 		{
 			//MPI_Recv();
+			std::vector<uint8_t> recvBuff(tilebufferSize);
+			MPI_Recv(recvBuff.data(), static_cast<int>(recvBuff.size()), MPI_UNSIGNED_CHAR,
+				i, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE   );
 			spdlog::critical("MASTER node recieving from node {}", i);
 		}
 	}
