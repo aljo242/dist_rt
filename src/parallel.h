@@ -35,9 +35,12 @@ void Render(const ConfigInfo& config)
 	MPI_Init(NULL, NULL);
 	int worldRank;
 	int worldSize;
+	
 
 	MPI_Comm_size(MPI_COMM_WORLD, &worldSize);
 	MPI_Comm_rank(MPI_COMM_WORLD, &worldRank);
+	const auto u_worldRank = static_cast<uint32_t>(worldRank);
+	const auto u_worldSize = static_cast<uint32_t>(worldSize);
 
 	auto bufferSize = static_cast<size_t>(config.imagebufferSize * config.imageNumChannels);
 	const auto imagebufferWidth = config.imagebufferWidth;
@@ -45,7 +48,7 @@ void Render(const ConfigInfo& config)
 	const auto imagebufferSize = config.imagebufferSize;
 
 	TileInfo tileInfo;
-	fillTileInfo(worldSize, config, tileInfo);
+	fillTileInfo(u_worldSize, config, tileInfo);
 	TileGrid grid(tileInfo);
 
 	bufferSize = static_cast<size_t>(imagebufferSize * config.imageNumChannels);
@@ -70,7 +73,7 @@ void Render(const ConfigInfo& config)
 		image.reserve(tileInfo.tileSize * config.imageNumChannels);
 	}
 
-	const auto gridIndices = grid.indices[worldRank];
+	const auto gridIndices = grid.indices[u_worldRank];
 	const auto startIndex_X = gridIndices.first;
 	const auto stopIndex_X = startIndex_X + tileInfo.tileWidth;
 	const auto startIndex_Y = gridIndices.second;
