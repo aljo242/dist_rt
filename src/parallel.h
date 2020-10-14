@@ -184,9 +184,15 @@ void copyToImage(const std::vector<uint8_t>& recvBuffer,
 	}
 
 	spdlog::critical("X: ({}, {}), Y: ({}, {})", startIndex_X, stopIndex_X, startIndex_Y, stopIndex_Y);
-	for (size_t i = 0; i < recvBuffer.size(); ++i)
+	for (size_t i = 0; i < recvBuffer.size(); i+= numChannels)
 	{
-		image[i] = 0;
+		size_t index = (i + startIndex_X);
+		size_t yOffset = (index / tileInfo.tileWidth);
+		index = index + (yOffset * tileInfo.tileHeight);
+
+		image[index] = recvBuffer[i];
+		image[index + 1] = recvBuffer[i + 1];
+		image[index + 2] = recvBuffer[i + 2];
 	}
 
 }
