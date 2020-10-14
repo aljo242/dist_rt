@@ -137,11 +137,15 @@ void Render(const ConfigInfo& config)
 	}
 
 	MPI_Barrier(MPI_COMM_WORLD);
+
+
+	if (worldRank == MASTER)
+	{
+		writePNG(config.outputFilename, imagebufferWidth, imagebufferHeight, config.imageNumChannels, image);
+	}
+
 	MPI_Finalize();
-
-	writePNG(config.outputFilename, imagebufferWidth, imagebufferHeight, config.imageNumChannels, image);
 }
-
 
 #endif // WITH_MPI
 
