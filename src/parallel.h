@@ -29,6 +29,12 @@ Color3 RayColor(const Ray3& ray, const Sphere& s)
 	return { (1.0f - t) * Color3(1.0f, 1.0f, 1.0f) + t * Color3(0.5f, 0.7f, 1.0f) };
 }
 
+void copyToImage(const std::vector<uint8_t>& recvBuffer, 
+	const TileInfo& tileInfo, 
+	const TileGrid& tileGrid, 
+	const int tileIndex, 
+	std::vector<uint8_t>& image);
+
 
 void Render(const ConfigInfo& config)
 {
@@ -139,6 +145,7 @@ void Render(const ConfigInfo& config)
 			//MPI_Recv();
 			MPI_Recv(recvBuff.data(), static_cast<int>(recvBuff.size()), MPI_UNSIGNED_CHAR,
 				i, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE   );
+			copyToImage(recvBuff, tileInfo, grid, i, image);
 			spdlog::critical("MASTER node recieving from node {}", i);
 		}
 	}
@@ -154,6 +161,32 @@ void Render(const ConfigInfo& config)
 	MPI_Finalize();
 }
 
+
+void copyToImage(const std::vector<uint8_t>& recvBuffer,
+	const TileInfo& tileInfo,
+	const TileGrid& tileGrid,
+	const int tileIndex,
+	std::vector<uint8_t>& image)
+{
+	const auto gridIndices = grid.indices[static_cast<size_t>(tileIndex)];
+	const auto startIndex_X = gridIndices.first;
+	const auto stopIndex_X = startIndex_X + tileInfo.tileWidth;
+	const auto startIndex_Y = gridIndices.second;
+	const auto stopIndex_Y = startIndex_Y + tileInfo.tileHeight;
+
+	if ((stopIndex_X - startIndex_X) * (stopIndex_Y - startIndex_Y) != recvBuffer.size())
+	{
+		spdlog::error("buffer tile sizes to not match!\n------------ Info ------------\nIndices: ({}, {}), Y: ({}, {})\nRecvbuffer size: {}", 
+			startIndex_X, stopIndex_X, startIndex_Y, stopIndex_Y, recvBuffer.size());
+	}
+
+	spdlog::critical("X: ({}, {}), Y: ({}, {})", startIndex_X, stopIndex_X, startIndex_Y, stopIndex_Y);
+	for (size_t i = 0; i < recvBuffer.size(); ++i)
+	{
+
+	}
+
+}
 #endif // WITH_MPI
 
 
