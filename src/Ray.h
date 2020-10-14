@@ -38,7 +38,7 @@ private:
 	Point3 origin;
 	Vec3 dir;
 	HitRecord hr;
-	float time = 0.0f;
+	//float time = 0.0f;
 };
 
 #endif

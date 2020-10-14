@@ -4,21 +4,21 @@
 
 struct TileInfo
 {
-	int numTiles;
-	int tileWidth;
-	int tileHeight;
-	int tileSize;
-	std::pair<int, int> tileDims;
+	uint32_t numTiles;
+	uint32_t tileWidth;
+	uint32_t tileHeight;
+	uint32_t tileSize;
+	std::pair<uint32_t, uint32_t> tileDims;
 };
 
 struct TileGrid
 {
 	TileGrid(const TileInfo& info);
 
-	std::vector<std::pair<int, int>> indices;
+	std::vector<std::pair<uint32_t, uint32_t>> indices;
 };
 
-void fillTileInfo(const int numTiles, const ConfigInfo& config, TileInfo& ti);
+void fillTileInfo(const uint32_t numTiles, const ConfigInfo& config, TileInfo& ti);
 
 
 #endif // TILING_H

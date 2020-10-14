@@ -39,10 +39,10 @@ void Render(const ConfigInfo& config)
 	MPI_Comm_size(MPI_COMM_WORLD, &worldSize);
 	MPI_Comm_rank(MPI_COMM_WORLD, &worldRank);
 
-	int bufferSize = config.imagebufferSize * config.imageNumChannels;
-	int imagebufferWidth = config.imagebufferWidth;
-	int imagebufferHeight = config.imagebufferHeight;
-	int imagebufferSize = config.imagebufferSize;
+	auto bufferSize = static_cast<size_t>(config.imagebufferSize * config.imageNumChannels);
+	const auto imagebufferWidth = config.imagebufferWidth;
+	const auto imagebufferHeight = config.imagebufferHeight;
+	const auto imagebufferSize = config.imagebufferSize;
 
 	TileInfo tileInfo;
 	fillTileInfo(worldSize, config, tileInfo);
@@ -58,7 +58,6 @@ void Render(const ConfigInfo& config)
 
 	Sphere testSphere(Point3(0.0, 0.0, -1.0), 0.5f);
 
-	
 	std::vector<uint8_t> image;
 
 	if (worldRank == MASTER)
@@ -78,23 +77,23 @@ void Render(const ConfigInfo& config)
 	spdlog::critical("X: ({}, {}), Y: ({}, {})", startIndex_X, stopIndex_X, startIndex_Y, stopIndex_Y);
 
 	size_t index = 0;
-	for (int j = startIndex_Y; j < stopIndex_Y; ++j)
+	for (uint32_t j = startIndex_Y; j < stopIndex_Y; ++j)
 	{
-		for (int i = startIndex_X; i < stopIndex_X; ++i)
+		for (uint32_t i = startIndex_X; i < stopIndex_X; ++i)
 		{
 			Color3 pixelColor = Color3(0, 0, 0);
 
-			for (int s = 0; s < config.samplesPerPixel; ++s)
+			for (uint32_t s = 0; s < config.samplesPerPixel; ++s)
 			{
-				const auto u = (static_cast<float>(i) + randFloat()) / (imagebufferWidth - 1);
-				const auto v = (static_cast<float>(j) + randFloat()) / (imagebufferHeight - 1);
+				const auto u = (static_cast<float>(i) + randFloat()) / (static_cast<float>(imagebufferWidth - 1));
+				const auto v = (static_cast<float>(j) + randFloat()) / (static_cast<float>(imagebufferHeight - 1));
 
 				Ray3 r = cam.getRay(u, v);
 				pixelColor += RayColor(r, testSphere);
 			}
 
 			// scale by num samples
-			const auto scale = 1.0f / config.samplesPerPixel;
+			const auto scale = 1.0f / static_cast<float>(config.samplesPerPixel);
 			const auto r = pixelColor.r * scale;
 			const auto g = pixelColor.g * scale;
 			const auto b = pixelColor.b * scale;
@@ -106,7 +105,7 @@ void Render(const ConfigInfo& config)
 			//spdlog::critical("{}", index);
 			if (worldRank == MASTER)
 			{
-				auto index = i * config.imageNumChannels + j * imagebufferWidth * config.imageNumChannels;
+				const auto index = static_cast<size_t>(i * config.imageNumChannels + j * imagebufferWidth * config.imageNumChannels);
 				image[index] = ir;
 				image[index + 1] = ig;
 				image[index + 2] = ib;

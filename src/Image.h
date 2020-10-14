@@ -4,6 +4,6 @@
 #include <vector>
 #include "defs.h"
 
-void writePNG(const char* filename, const int w, const int h, const int c, const std::vector<uint8_t>& image);
+void writePNG(const char* filename, const uint32_t w, const uint32_t h, const uint32_t c, const std::vector<uint8_t>& image);
 
 #endif

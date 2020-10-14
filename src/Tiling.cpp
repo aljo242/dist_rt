@@ -7,9 +7,8 @@ TileGrid::TileGrid(const TileInfo& info)
 	:
 	indices(info.numTiles)
 {
-	int counter{ 0 };
-	int xOffset{ 0 };
-	int yOffset{ 0 };
+	uint32_t xOffset{ 0 };
+	uint32_t yOffset{ 0 };
 
 	if (info.numTiles != info.tileDims.first * info.tileDims.second)
 	{
@@ -18,12 +17,12 @@ TileGrid::TileGrid(const TileInfo& info)
 			info.numTiles, info.tileDims.first, info.tileDims.second);
 	}
 
-	for (int i = 0; i < info.tileDims.first; ++i)
+	for (uint32_t i = 0; i < info.tileDims.first; ++i)
 	{
-		for (int j = 0; j < info.tileDims.second; ++j)
+		for (uint32_t j = 0; j < info.tileDims.second; ++j)
 		{
 			spdlog::critical("TILE OFFSET: ({}, {})", i, j);
-			const auto gridIndex = static_cast<size_t>(i * info.tileDims.first + j);
+			const auto gridIndex = static_cast<size_t>(i) * info.tileDims.first + static_cast<size_t>(j);
 			
 			// assign to indices
 			xOffset = i * info.tileWidth;
@@ -33,26 +32,26 @@ TileGrid::TileGrid(const TileInfo& info)
 	}
 }
 
-void fillTileInfo(const int numTiles, const ConfigInfo& config, TileInfo& ti)
+void fillTileInfo(const uint32_t numTiles, const ConfigInfo& config, TileInfo& ti)
 {
-	int imagebufferSize = config.imagebufferSize;
-	int imagebufferHeight = config.imagebufferHeight;
-	int imagebufferWidth = config.imagebufferWidth;
+	auto imagebufferSize = config.imagebufferSize;
+	auto imagebufferHeight = config.imagebufferHeight;
+	auto imagebufferWidth = config.imagebufferWidth;
 
-	const int remainder = imagebufferSize % numTiles;
+	const auto remainder = imagebufferSize % numTiles;
 	if (remainder != 0)
 	{
 		imagebufferSize = imagebufferSize - remainder;
 	}
 
-	const int tileSize = imagebufferSize / numTiles;
-	int tileWidth{ 0 };
-	int tileHeight{ 0 };
+	const auto tileSize = imagebufferSize / numTiles;
+	uint32_t tileWidth{ 0 };
+	uint32_t tileHeight{ 0 };
 
 	// easy decomposition if we have tiles as square
 	if (isPerfectSquare(numTiles))
 	{
-		const auto SRnumTiles = static_cast<int>(std::sqrt(numTiles));
+		const auto SRnumTiles = static_cast<decltype(tileWidth)>(std::sqrt(numTiles));
 		tileWidth = imagebufferWidth / SRnumTiles;
 		tileHeight = imagebufferHeight / SRnumTiles;
 		ti.tileDims.first = SRnumTiles;
@@ -65,7 +64,7 @@ void fillTileInfo(const int numTiles, const ConfigInfo& config, TileInfo& ti)
 		return;
 	}
 
-	ti.numTiles = numTiles;
+	ti.numTiles = static_cast<uint32_t>(numTiles);
 	ti.tileWidth = tileWidth;
 	ti.tileHeight = tileHeight;
 	ti.tileSize = tileSize;

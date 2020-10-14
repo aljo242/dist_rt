@@ -48,21 +48,21 @@ struct ViewPort
 
 struct ConfigInfo
 {
-	int imagebufferSize;
-	int imagebufferWidth;
-	int imagebufferHeight;
-	int imageNumChannels = 3;
-	int samplesPerPixel;
-	int numTiles;
+	uint32_t imagebufferSize;
+	uint32_t imagebufferWidth;
+	uint32_t imagebufferHeight;
+	uint32_t imageNumChannels = 3;
+	uint32_t samplesPerPixel;
+	uint32_t numTiles;
 	const char* inputFilename;
 	const char* outputFilename;
 };
 
 
-constexpr int imageWidth{ 2560 };
-constexpr int imageHeight{ static_cast<int>(imageWidth / aspectRatio) };
-constexpr int numChannels{ 3 };
-constexpr int imageSize{ imageHeight * imageWidth };
+constexpr uint32_t imageWidth{ 2560 };
+constexpr uint32_t imageHeight{ static_cast<int>(imageWidth / aspectRatio) };
+constexpr uint32_t numChannels{ 3 };
+constexpr uint32_t imageSize{ imageHeight * imageWidth };
 
 constexpr size_t defaultNumObjects = 1000;
 
