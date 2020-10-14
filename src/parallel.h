@@ -146,6 +146,7 @@ void Render(const ConfigInfo& config)
 			//MPI_Recv();
 			MPI_Recv(recvBuff.data(), static_cast<int>(recvBuff.size()), MPI_UNSIGNED_CHAR,
 				i, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE   );
+			spdlog::critical("RecieveBuffer Size: {}", recvBuff.size())
 			copyToImage(recvBuff, tileInfo, grid, i, image);
 			spdlog::critical("MASTER node recieving from node {}", i);
 		}
