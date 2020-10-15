@@ -59,13 +59,12 @@ struct ConfigInfo
 };
 
 
-constexpr uint32_t imageWidth{ 32 };
+constexpr uint32_t imageWidth{ 128 };
 constexpr uint32_t imageHeight{ static_cast<int>(imageWidth / aspectRatio) };
 constexpr uint32_t numChannels{ 3 };
 constexpr uint32_t imageSize{ imageHeight * imageWidth };
 
 constexpr size_t defaultNumObjects = 1000;
-
 
 // Distributed variables
 constexpr int MASTER = 0;
