@@ -9,6 +9,7 @@
 #include "Sphere.h"
 #include "Camera.h"
 #include "Tiling.h"
+#include "VMesh.h"
 
 #include <spdlog/spdlog.h>
 
@@ -34,13 +35,15 @@ void Render(const ConfigInfo& config)
 	const auto imagebufferHeight = config.imagebufferHeight;
 	auto imagebufferSize = config.imagebufferSize;
 
-	uint32_t numTiles = 4;
+	uint32_t numPEs = 4;
 
-	TileInfo tileInfo;
-	fillTileInfo(numTiles, config, tileInfo);
-	TileGrid grid(tileInfo);
+	//TileInfo tileInfo;
+	//fillTileInfo(numTiles, config, tileInfo);
+	//TileGrid grid(tileInfo);
+
 
 	bufferSize = static_cast<size_t>(imagebufferSize * config.imageNumChannels);
+
 
 	ViewPort vp;
 	vp.origin = Point3(0, 0, 0);
@@ -52,18 +55,25 @@ void Render(const ConfigInfo& config)
 	Sphere testSphere(Point3(0.0, 0.0, -1.0), 0.5f);
 
 	std::vector<uint8_t> image(bufferSize);
-	for (uint32_t n = 0; n < numTiles; ++n)
-	{
-		const auto gridIndices = grid.indices[n];
-		const auto startIndex_X = gridIndices.first;
-		const auto stopIndex_X = startIndex_X + tileInfo.tileWidth;
-		const auto startIndex_Y = gridIndices.second;
-		const auto stopIndex_Y = startIndex_Y + tileInfo.tileHeight;
-		spdlog::critical("X: ({}, {}), Y: ({}, {})", startIndex_X, stopIndex_X, startIndex_Y, stopIndex_Y);
 
-		for (uint32_t j = startIndex_Y; j < stopIndex_Y; ++j)
+	for (uint32_t n = 0; n < numPEs; ++n)
+	{
+		VMesh myMesh(numPEs, n, imagebufferSize, imagebufferWidth, imagebufferHeight);
+		VMeshDims startIndices{ 0, 0 };
+		VMeshDims endIndices{ 0, 0 };
+
+		const auto addr = myMesh.virtualAddress;
+		const auto block = myMesh.localDims;
+		//const auto data = myMesh.dataDims;
+
+		startIndices = { addr.x * block.x, addr.y * block.y };
+		endIndices = { (addr.x + 1) * block.x, (addr.y + 1) * block.y };
+
+		spdlog::critical("X: ({}, {}), Y: ({}, {})", startIndices.x, endIndices.x, startIndices.y, endIndices.y);
+
+		for (uint32_t j = startIndices.y; j < endIndices.y; ++j)
 		{
-			for (uint32_t i = startIndex_X; i < stopIndex_X; ++i)
+			for (uint32_t i = startIndices.x; i < endIndices.x; ++i)
 			{
 				Color3 pixelColor = Color3(0, 0, 0);
 
