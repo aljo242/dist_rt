@@ -60,6 +60,7 @@ endif()
 option(BUILD_SHARED_LIBS "Enable compilation of shared libraries" OFF)
 option(ENABLE_CLANG_TIDY "Enable testing with clang-tidy" ON)
 option(ENABLE_CPPCHECK "Enable testing with cppcheck" OFF)
+option(ENABLE_TESTING "Enable unit testing" ON)
 
 option(ENABLE_PCH "Enable Precompiled Headers" OFF)
 if(ENABLE_PCH)
@@ -99,4 +100,10 @@ add_subdirectory(src)
 
 ####################################################################################
 
-
+# TESTING
+if(ENABLE_TESTING)
+	MESSAGE("Adding Unit Tests")
+	include(CTest)
+	enable_testing()
+	add_subdirectory(test)
+endif()

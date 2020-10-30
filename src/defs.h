@@ -3,9 +3,13 @@
 
 
 #define GLM_FORCE_CXX17
-#include <glm/glm.hpp>
+#include <glm/vec2.hpp>           // vec2
+#include <glm/vec3.hpp>           // vec3
+#include <glm/mat3x3.hpp>         // mat3
+#include <glm/mat4x4.hpp>         // mat4
 #include <glm/gtc/matrix_transform.hpp> // glm::translate, glm::rotate, glm::scale, glm::perspective
 #include <glm/gtx/scalar_multiplication.hpp>
+#include <glm/gtc/quaternion.hpp>
 
 #include <cstdint>
 #include <limits>
@@ -37,6 +41,11 @@ using Vec3 = glm::vec3;
 using Point3 = glm::vec3;
 using Color3 = glm::vec3;
 
+using Mat3 = glm::mat3x3;
+using Mat4= glm::mat4x4;
+
+using Quaternion = glm::quat;
+
 struct ViewPort
 {
 	Point3 origin;
@@ -59,7 +68,7 @@ struct ConfigInfo
 };
 
 
-constexpr uint32_t imageWidth{ 128 };
+constexpr uint32_t imageWidth{ 2560 };
 constexpr uint32_t imageHeight{ static_cast<int>(imageWidth / aspectRatio) };
 constexpr uint32_t numChannels{ 3 };
 constexpr uint32_t imageSize{ imageHeight * imageWidth };

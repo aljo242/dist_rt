@@ -45,7 +45,7 @@ VMesh::VMesh(const uint32_t numPEs, const uint32_t ID, const uint32_t dataSize)
 
 	if (ownerID == 0)
 	{
-		// printf("Local matrix slice of size %d is a (%d x %d) block\n", localSize, blockDim, blockDim);
+		printf("Local matrix slice of size %d is a (%d x %d) block\n", localSize, blockDim, blockDim);
 	}
 
 	virtualAddress.x = static_cast<uint32_t>(ownerID % meshDims.x);

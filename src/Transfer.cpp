@@ -24,11 +24,11 @@ namespace transfer
 
 		// printf("\n");
 		int localIndex = 0;
-		for (int j = startIndices.y; j < endIndices.y; ++j)
+		for (auto j = startIndices.y; j < endIndices.y; ++j)
 		{
-			for (int i = startIndices.x; i < endIndices.x; ++i)
+			for (auto i = startIndices.x; i < endIndices.x; ++i)
 			{
-				const int globalIndex = i + data.x * j;
+				const auto globalIndex = i + data.x * j;
 				//printf("local index: %d, [%d][%d], global index: %d\t\t\n", localIndex, i, j, globalIndex);
 				local[localIndex] = global[globalIndex];
 				++localIndex;
@@ -37,11 +37,11 @@ namespace transfer
 		}
 		// printf("\n");
 
-		const int disp = 1;
-		auto up = mesh.Up(disp);
-		auto down{ mesh.Down(disp) };
-		auto left{ mesh.Left(disp) };
-		auto right{ mesh.Right(disp) };
+		//const int disp = 1;
+		//auto up = mesh.Up(disp);
+		//auto down{ mesh.Down(disp) };
+		//auto left{ mesh.Left(disp) };
+		//auto right{ mesh.Right(disp) };
 
 		//printf("{%d}\n\tUp: [%d, %d]\n\tDown: [%d, %d]\n\tLeft: [%d, %d]\n\tRight: [%d, %d]\n",
 		//    mesh.ownerID, up.x, up.y, down.x, down.y, left.x, left.y, right.x, right.y);    
