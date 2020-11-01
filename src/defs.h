@@ -79,4 +79,24 @@ constexpr size_t defaultNumObjects = 1000;
 constexpr int MASTER = 0;
 
 
+// fwd declarations
+class Camera;
+class Medium;
+struct MediumInterface;
+class VMesh;
+class Ray3;
+struct Interaction;
+class MediumInteraction;
+class SurfaceInteraction;
+class Shape;
+class Material;
+struct CartCoord;
+class Sampler;
+class Texture;
+class Spectrum;
+class PhaseFunction;
+struct Shading;
+struct Primitive;
+
+
 #endif

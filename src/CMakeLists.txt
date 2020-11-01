@@ -20,7 +20,22 @@ endif()
 
 add_executable(main 
 	main.cpp
-	 "Ray.h" "defs.h" "Ray.cpp" "Plane.h" "Plane.cpp" "Image.h" "Image.cpp" "Sphere.h" "Sphere.cpp" "Scene_Object.h" "utils.h" "Camera.h" "Camera.cpp" "Tiling.h" "Tiling.cpp" "VMesh.h" "VMesh.cpp" ${RUNTIME_INCLUDES} "Transfer.h" "Transfer.cpp" )
+	 "Ray.h" "Ray.cpp"
+	 "defs.h" 
+	 "Plane.h" "Plane.cpp" 
+	 "Image.h" "Image.cpp" 
+	 "Sphere.h" "Sphere.cpp" 
+	 "Scene_Object.h" 
+	 "utils.h" 
+	 "Camera.h" "Camera.cpp" 
+	 "Tiling.h" "Tiling.cpp" 
+	 "VMesh.h" "VMesh.cpp" 
+	 ${RUNTIME_INCLUDES} 
+	 "Transfer.h" "Transfer.cpp"  
+	 "Surface.h"  "Surface.cpp" 
+	 "Medium.h" "Medium.cpp" 
+	 "Material.cpp" "Material.cpp"
+	 )
 
 target_link_libraries(main PUBLIC
 	${EXTRA_LIBS}

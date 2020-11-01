@@ -8,6 +8,7 @@ constexpr float T_MIN{ 0.0f };
 constexpr float T_MAX{ infinity };
 
 class Ray3;
+class Medium;
 
 struct HitRecord
 {
@@ -17,6 +18,7 @@ public:
 	Point3 point;
 	Vec3 normal;
 	float t;			// distance cast into the scene
+	Medium* medium;
 };
 
 
