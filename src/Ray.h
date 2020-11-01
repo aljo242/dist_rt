@@ -10,18 +10,6 @@ constexpr float T_MAX{ infinity };
 class Ray3;
 class Medium;
 
-struct HitRecord
-{
-public:
-	// we will assume all collisions occur on to the "outward normal"  
-	// of the geometry
-	Point3 point;
-	Vec3 normal;
-	float t;			// distance cast into the scene
-	Medium* medium;
-};
-
-
 class Ray3
 {
 public:
@@ -30,17 +18,27 @@ public:
 	Ray3(const Vec3& d);
 
 	void Normalize();
-	Vec3 Dir() const;
-	Point3 Origin() const;
 	Point3 At(const float t) const;
 	float DirLength() const;
-	void ModifyHitRecord(const Ray3& n, const float t);
 
-private:
+public:
 	Point3 origin;
 	Vec3 dir;
-	HitRecord hr;
-	//float time = 0.0f;
+	float t_max = T_MAX;
+	float time = 0.0f;
+	Medium* medium {nullptr};
+};
+
+
+class RayDifferential3 : public Ray3
+{
+public:
+	RayDifferential3();
+	RayDifferential3(const Vec3& o, const Point3& d);
+	bool HasNaNs() const;
+	void Scale(float s);
+	x 
+
 };
 
 #endif

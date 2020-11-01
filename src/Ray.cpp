@@ -40,9 +40,3 @@ float Ray3::DirLength() const
 	return  std::sqrt(dir.x * dir.x + dir.y * dir.y + dir.z * dir.z);
 }
 
-void Ray3::ModifyHitRecord(const Ray3& n, const float t)
-{
-	hr.point	= n.Origin();
-	hr.normal	= n.Dir();
-	hr.t		= t;
-}

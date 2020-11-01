@@ -85,6 +85,7 @@ class Medium;
 struct MediumInterface;
 class VMesh;
 class Ray3;
+class RayDifferential3;
 struct Interaction;
 class MediumInteraction;
 class SurfaceInteraction;
