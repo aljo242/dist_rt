@@ -8,10 +8,10 @@ Plane::Plane(const Point3& origin, const Vec3& A, const Vec3& B)
 
 Vec3 Plane::NormVec() const
 {
-	return norm.Dir();
+	return norm.dir;
 }
 
 Point3 Plane::NormPoint() const
 {
-	return norm.Origin();
+	return norm.origin;
 }

@@ -20,15 +20,6 @@ void Ray3::Normalize()
 	dir = Vec3(dir.x / length, dir.y / length, dir.z / length);
 }
 
-Vec3 Ray3::Dir() const
-{
-	return dir;
-}
-
-Point3 Ray3::Origin() const
-{
-	return origin;
-}
 
 Point3 Ray3::At(const float t) const
 {

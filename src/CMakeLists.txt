@@ -35,7 +35,7 @@ add_executable(main
 	 "Surface.h"  "Surface.cpp" 
 	 "Medium.h" "Medium.cpp" 
 	 "Material.cpp" "Material.cpp"
-	 )
+	  "Timer.h" "Timer.cpp")
 
 target_link_libraries(main PUBLIC
 	${EXTRA_LIBS}

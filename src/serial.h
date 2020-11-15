@@ -12,10 +12,11 @@
 #include "VMesh.h"
 
 #include <spdlog/spdlog.h>
+#include <omp.h>
 
 Color3 RayColor(const Ray3& ray, const Sphere& s)
 {
-	Vec3 dir = ray.Dir(); // ray returns normalized vectors
+	Vec3 dir = ray.dir; // ray returns normalized vectors
 	const auto t = 0.5f * (dir.y + 1.0f);
 
 	if (s.Intersect(ray, 0, infinity))
@@ -56,9 +57,10 @@ void Render(const ConfigInfo& config)
 
 	std::vector<uint8_t> image(bufferSize);
 
-	for (uint32_t n = 0; n < numPEs; ++n)
+#pragma omp parallel for 
+	for (int n = 0; n < numPEs; ++n)
 	{
-		VMesh myMesh(numPEs, n, imagebufferSize, imagebufferWidth, imagebufferHeight);
+		VMesh myMesh(numPEs, static_cast<uint32_t>(n), imagebufferSize, imagebufferWidth, imagebufferHeight);
 		VMeshDims startIndices{ 0, 0 };
 		VMeshDims endIndices{ 0, 0 };
 

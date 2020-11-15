@@ -20,7 +20,7 @@
 #include "Scene_Object.h"
 #include "Sphere.h"
 #include "Camera.h"
-
+#include "Timer.h"
 
 
 
@@ -61,10 +61,10 @@ private:
 std::optional<Color3> IntersectPlane(const Ray3& ray, const Plane& plane)
 {
 	const auto planeNormal = plane.NormVec();
-	const float denom{ glm::dot(planeNormal, ray.Dir()) };
+	const float denom{ glm::dot(planeNormal, ray.dir) };
 	if (std::fabs(denom) > epsilon)
 	{
-		const float t = glm::dot((plane.NormPoint() - ray.Origin()), planeNormal) / denom;
+		const float t = glm::dot((plane.NormPoint() - ray.origin), planeNormal) / denom;
 		if (t >= 0.0f) // test if intersection is in front of camera, discard if behind
 		{
 			return { Color3(0.33f, 0.55f, 0.77f) };
@@ -80,7 +80,7 @@ int main()
 	spdlog::critical("Hello World!");
 
 	Ray3 testRay{ {0,0,0}, {2, 2, 2} };
-	spdlog::critical("test ray norm: {} {} {}", testRay.Dir().x, testRay.Dir().y, testRay.Dir().z);
+	spdlog::critical("test ray norm: {} {} {}", testRay.dir.x, testRay.dir.y, testRay.dir.z);
 
 	Plane testPlane(Point3(5, 5, 5), Vec3(5, 0, 1), Vec3(0, 1, 0) );
 	
@@ -98,7 +98,12 @@ int main()
 	config.outputFilename = "test_output.png";
 	config.samplesPerPixel = 50;
 	
+	Timer timer;
+
+	timer.Start();
 	Render(config);
+	const auto rendertime = timer.Stop();
+	spdlog::critical("Elapsed Time: {}s", rendertime / 1000.0);
 
 	return 0;
 }

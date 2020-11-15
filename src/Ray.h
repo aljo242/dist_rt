@@ -36,8 +36,7 @@ public:
 	RayDifferential3();
 	RayDifferential3(const Vec3& o, const Point3& d);
 	bool HasNaNs() const;
-	void Scale(float s);
-	x 
+	void Scale(float s); 
 
 };
 
