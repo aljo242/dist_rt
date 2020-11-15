@@ -97,9 +97,3 @@ bool Transform::SwapHandedness() const
 
 }
 
-
-
-Transform Translate(const Vec3& delta)
-{
-	return glm::translate(Mat4(1.0), delta);
-}

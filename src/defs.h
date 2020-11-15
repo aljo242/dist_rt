@@ -33,6 +33,36 @@ inline float Length(const glm::vec3& vec)
 	return std::sqrt(vec.x * vec.x + vec.y * vec.y + vec.z * vec.z);
 }
 
+inline float LengthSquared(const glm::vec2& vec)
+{
+	return vec.x * vec.x + vec.y * vec.y;
+}
+
+inline float LengthSquared(const glm::vec3& vec)
+{
+	return vec.x * vec.x + vec.y * vec.y + vec.z * vec.z;
+}
+
+inline float Distance(const glm::vec2& v1, const glm::vec2& v2)
+{
+	return Length(v1 - v2);
+}
+
+inline float Distance(const glm::vec3& v1, const glm::vec3& v2)
+{
+	return Length(v1 - v2);
+}
+
+inline float DistanceSquared(const glm::vec2& v1, const glm::vec2& v2)
+{
+	return LengthSquared(v1 - v2);
+}
+
+inline float DistanceSquared(const glm::vec3& v1, const glm::vec3& v2)
+{
+	return LengthSquared(v1 - v2);
+}
+
 // typedefs
 using Vec2 = glm::vec2;
 using Point2 = glm::vec2;
@@ -99,6 +129,5 @@ class Spectrum;
 class PhaseFunction;
 struct Shading;
 struct Primitive;
-
 
 #endif
